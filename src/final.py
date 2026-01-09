@@ -164,27 +164,28 @@ class ScraperService:
 
 
 # ==================== EXPORT TO EXCEL ====================
-def export_to_excel(all_results: list, base_file_name: str = "comments_export", output_dir: str = "excel_comment2"):
+def export_to_excel(all_results: list, base_file_name: str = "comments_export", output_dir: str = "excel_comment_result"):
     """
-    Export products với comments ra nhiều file Excel, mỗi file tối đa 100 comments
-    Tối ưu memory bằng cách xử lý từng product
+    Export products với comments ra 1 file Excel duy nhất
 
     Args:
         all_results: list - Danh sách kết quả crawl (mỗi item có "product" và "comments")
-        base_file_name: str - Tên file cơ bản (sẽ thêm số thứ tự vào)
-        output_dir: str - Thư mục để lưu các file Excel
+        base_file_name: str - Tên file cơ bản
+        output_dir: str - Thư mục để lưu file Excel
     """
     # Tạo thư mục output nếu chưa tồn tại
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     print(f"\n📁 Lưu file vào thư mục: {output_path.absolute()}")
 
-    MAX_COMMENTS_PER_FILE = 100
-    file_index = 1
+    # Tạo workbook và worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Comments"
+    ws.append(["link", "name_item", "comments_id", "comments_content"])
+
     comment_count = 0
     product_count = 0
-    wb = None
-    ws = None
 
     try:
         for result in all_results:
@@ -198,13 +199,6 @@ def export_to_excel(all_results: list, base_file_name: str = "comments_export", 
             if comments:
                 first = True
                 for idx, comment in enumerate(comments):
-                    if wb is None:
-                        wb = Workbook()
-                        ws = wb.active
-                        ws.title = "Comments"
-                        ws.append(
-                            ["link", "name_item", "comments_id", "comments_content"])
-
                     # Lấy comments_id (có thể dùng index hoặc name)
                     comments_id = comment.get("id", str(idx))
                     comments_content = comment.get("content", "")
@@ -219,33 +213,19 @@ def export_to_excel(all_results: list, base_file_name: str = "comments_export", 
 
                     comment_count += 1
 
-                    # Kiểm tra nếu đủ 100 comments thì lưu file và tạo file mới
-                    if comment_count >= MAX_COMMENTS_PER_FILE:
-                        file_name = output_path / \
-                            f"{base_file_name}_{file_index}.xlsx"
-                        wb.save(str(file_name))
-                        print(
-                            f"✅ Đã xuất file: {file_name} ({comment_count} dòng comments)")
-                        wb = None
-                        ws = None
-                        comment_count = 0
-                        file_index += 1
-                        first = True  # Reset first flag cho product tiếp theo
-
-        # Lưu file cuối cùng nếu còn dữ liệu
-        if wb is not None and comment_count > 0:
-            file_name = output_path / f"{base_file_name}_{file_index}.xlsx"
-            wb.save(str(file_name))
-            print(
-                f"✅ Đã xuất file: {file_name} ({comment_count} dòng comments)")
+        # Lưu file
+        file_name = output_path / f"{base_file_name}.xlsx"
+        wb.save(str(file_name))
+        print(
+            f"✅ Đã xuất file: {file_name} ({comment_count} dòng comments)")
 
         print(
-            f"\n🎉 Hoàn thành! Đã xử lý {product_count} products và tạo {file_index} file(s) Excel")
+            f"\n🎉 Hoàn thành! Đã xử lý {product_count} products và tạo 1 file Excel")
 
     except Exception as e:
         # Lưu file hiện tại nếu có lỗi
         if wb is not None and comment_count > 0:
-            file_name = output_path / f"{base_file_name}_{file_index}.xlsx"
+            file_name = output_path / f"{base_file_name}.xlsx"
             wb.save(str(file_name))
             print(f"⚠️ Đã lưu file cuối cùng trước khi có lỗi: {file_name}")
         raise e
@@ -257,8 +237,23 @@ def main():
     scraper_service = ScraperService()
 
     links = [
+        # "https://www.thegioididong.com/dong-ho-deo-tay-nam",
+        # "https://www.thegioididong.com/dong-ho-deo-tay#c=7264&o=8&pi=0"
+        # "https://www.thegioididong.com/dong-ho-deo-tay-nu",
+        # "https://www.thegioididong.com/dong-ho-deo-tay-casio",
+        # "https://www.thegioididong.com/dong-ho-deo-tay-citizen",
+        # "https://www.thegioididong.com/dong-ho-deo-tay-orient",
+        # "https://www.thegioididong.com/khuyen-mai-dong-ho-chi-ban-online",
+        # "https://www.thegioididong.com/dong-ho-deo-tay-MVW",
+        # "https://www.thegioididong.com/dong-ho-deo-tay-elio",
+        # "https://www.thegioididong.com/dong-ho-deo-tay-tre-em",
+        # "https://www.thegioididong.com/camera-giam-sat",
+        # "https://www.thegioididong.com/tai-nghe",
+        # "https://www.thegioididong.com/sac-dtdd",
+        # "https://www.thegioididong.com/phu-kien/apple",
+        # "https://www.thegioididong.com/loa-laptop",
+        # "https://www.thegioididong.com/chuong-trinh-phu-kien-laptop",
         "https://www.thegioididong.com/sac-cap",
-        "https://www.thegioididong.com/chuong-trinh-phu-kien-laptop",
     ]
 
     driver = get_driver()

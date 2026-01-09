@@ -47,6 +47,14 @@ Dự án sử dụng **Repository Pattern** và **Service Layer Pattern**:
 
 ## Cài đặt
 
+### 🪟 Cài đặt trên Windows (Máy mới)
+
+**Xem hướng dẫn chi tiết:** [SETUP_WINDOWS.md](./SETUP_WINDOWS.md)
+
+**Hoặc sử dụng script tự động:**
+1. Double-click file `setup.bat` để tự động cài đặt
+2. Sau đó double-click `run.bat` để chạy dự án
+
 ### Cách 1: Sử dụng virtual environment (khuyến nghị)
 
 ```bash
@@ -82,6 +90,13 @@ pip install -r requirements.txt
 - Luôn activate venv trước khi chạy code hoặc cài đặt packages
 
 ## Sử dụng
+
+### Trên Windows (dễ dàng):
+
+- **Chạy scraping:** Double-click `run.bat`
+- **Development mode:** Double-click `run_dev.bat`
+
+### Trên macOS/Linux:
 
 ### Chạy development mode (hot reload):
 
