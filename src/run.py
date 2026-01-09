@@ -11,7 +11,11 @@ Hoặc sử dụng IPython để có trải nghiệm tốt hơn:
 - %run src/main.py  (chạy lần đầu)
 - %run src/main.py  (chạy lại sau khi sửa code, driver sẽ được tái sử dụng)
 """
+from json import dumps
 from config.driver import get_driver, close_driver
+# Import module version, không phải biến version
+from config import version as version_module
+# import config.version as version_module
 import importlib
 import sys
 import os
@@ -19,25 +23,24 @@ import os
 # Thêm thư mục src vào path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Danh sách modules cần reload
-MODULES_TO_RELOAD = [
+# Danh sách prefix modules cần reload (kể cả submodule)
+MODULE_PREFIXES = (
     'models',
-    'config',
     'repositories',
     'services',
     'utils',
-    'main'
-]
+    'main',
+)
 
 
 def reload_modules():
     """Reload tất cả modules đã import"""
-    for module_name in MODULES_TO_RELOAD:
-        if module_name in sys.modules:
+    for name in list(sys.modules.keys()):
+        if name.startswith(MODULE_PREFIXES):
             try:
-                importlib.reload(sys.modules[module_name])
+                importlib.reload(sys.modules[name])
             except Exception as e:
-                print(f"Không thể reload {module_name}: {e}")
+                print(f"Không thể reload {name}: {e}")
 
 
 if __name__ == "__main__":
@@ -48,17 +51,22 @@ if __name__ == "__main__":
     # Khởi tạo driver một lần
     driver = get_driver()
     is_first_run = True
+    version_count = 0
 
     while True:
         try:
             print("\n" + "-" * 60)
             print("Nhấn Enter để chạy lại code từ main.py...")
             print("(Hoặc nhấn Ctrl+C để dừng)")
-
+            # Cập nhật version global
+            current_version = version_module.version
+            version_module.version = f"{current_version}.{version_count}"
+            version_count += 1
             if is_first_run:
                 is_first_run = False
             else:
                 input()
+            print(f"Version: {version_module.version}")
 
             # Reload tất cả modules
             reload_modules()
@@ -79,3 +87,4 @@ if __name__ == "__main__":
             print(f"\nLỗi: {e}")
             import traceback
             traceback.print_exc()
+            break

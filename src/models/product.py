@@ -1,6 +1,7 @@
 """
 Product models
 """
+from datetime import datetime
 from typing import TypedDict, List
 
 
@@ -16,4 +17,7 @@ class Product(TypedDict):
     """Product model"""
     name: str
     link: str
-    comments: List[dict]
+    comments: List[Comment]
+    total_comments: int
+    crawled_at: datetime
+    version: str

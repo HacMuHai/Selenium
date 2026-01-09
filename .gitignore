@@ -30,8 +30,6 @@ env.bak/
 venv.bak/
 
 # IDE
-.vscode/
-.idea/
 *.swp
 *.swo
 *~
