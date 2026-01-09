@@ -7,6 +7,7 @@ import traceback
 import time
 import os
 import stat
+from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -14,6 +15,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from webdriver_manager.chrome import ChromeDriverManager
 from bson import ObjectId
+from openpyxl import Workbook
 
 
 # ==================== DRIVER CONFIGURATION ====================
@@ -161,6 +163,94 @@ class ScraperService:
         return comments
 
 
+# ==================== EXPORT TO EXCEL ====================
+def export_to_excel(all_results: list, base_file_name: str = "comments_export", output_dir: str = "excel_comment2"):
+    """
+    Export products với comments ra nhiều file Excel, mỗi file tối đa 100 comments
+    Tối ưu memory bằng cách xử lý từng product
+
+    Args:
+        all_results: list - Danh sách kết quả crawl (mỗi item có "product" và "comments")
+        base_file_name: str - Tên file cơ bản (sẽ thêm số thứ tự vào)
+        output_dir: str - Thư mục để lưu các file Excel
+    """
+    # Tạo thư mục output nếu chưa tồn tại
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    print(f"\n📁 Lưu file vào thư mục: {output_path.absolute()}")
+
+    MAX_COMMENTS_PER_FILE = 100
+    file_index = 1
+    comment_count = 0
+    product_count = 0
+    wb = None
+    ws = None
+
+    try:
+        for result in all_results:
+            product_count += 1
+            product = result.get("product", {})
+            comments = result.get("comments", [])
+
+            link = product.get("link", "")
+            name_item = product.get("name", "")
+
+            if comments:
+                first = True
+                for idx, comment in enumerate(comments):
+                    if wb is None:
+                        wb = Workbook()
+                        ws = wb.active
+                        ws.title = "Comments"
+                        ws.append(
+                            ["link", "name_item", "comments_id", "comments_content"])
+
+                    # Lấy comments_id (có thể dùng index hoặc name)
+                    comments_id = comment.get("id", str(idx))
+                    comments_content = comment.get("content", "")
+
+                    if first:
+                        ws.append(
+                            [link, name_item, comments_id, comments_content])
+                        first = False
+                    else:
+                        # Các dòng sau để trống 2 cột đầu
+                        ws.append(["", "", comments_id, comments_content])
+
+                    comment_count += 1
+
+                    # Kiểm tra nếu đủ 100 comments thì lưu file và tạo file mới
+                    if comment_count >= MAX_COMMENTS_PER_FILE:
+                        file_name = output_path / \
+                            f"{base_file_name}_{file_index}.xlsx"
+                        wb.save(str(file_name))
+                        print(
+                            f"✅ Đã xuất file: {file_name} ({comment_count} dòng comments)")
+                        wb = None
+                        ws = None
+                        comment_count = 0
+                        file_index += 1
+                        first = True  # Reset first flag cho product tiếp theo
+
+        # Lưu file cuối cùng nếu còn dữ liệu
+        if wb is not None and comment_count > 0:
+            file_name = output_path / f"{base_file_name}_{file_index}.xlsx"
+            wb.save(str(file_name))
+            print(
+                f"✅ Đã xuất file: {file_name} ({comment_count} dòng comments)")
+
+        print(
+            f"\n🎉 Hoàn thành! Đã xử lý {product_count} products và tạo {file_index} file(s) Excel")
+
+    except Exception as e:
+        # Lưu file hiện tại nếu có lỗi
+        if wb is not None and comment_count > 0:
+            file_name = output_path / f"{base_file_name}_{file_index}.xlsx"
+            wb.save(str(file_name))
+            print(f"⚠️ Đã lưu file cuối cùng trước khi có lỗi: {file_name}")
+        raise e
+
+
 # ==================== MAIN FUNCTION ====================
 def main():
     """Hàm chính để chạy code"""
@@ -290,6 +380,12 @@ def main():
     print("KẾT QUẢ DẠNG JSON")
     print(f"{'='*60}")
     print(dumps(all_results, ensure_ascii=False, indent=2))
+
+    # Xuất ra Excel
+    print(f"\n\n{'='*60}")
+    print("XUẤT FILE EXCEL")
+    print(f"{'='*60}")
+    export_to_excel(all_results, "comments_export", "excel_comment2")
 
     close_driver()
 
