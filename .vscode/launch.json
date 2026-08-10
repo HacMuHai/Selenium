@@ -6,9 +6,9 @@
       "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
-      "cwd": "${workspaceFolder}/src",
+      "cwd": "${workspaceFolder}",
       "args": [
-        "app:app",
+        "src.app:app",
         "--reload",
         "--host",
         "127.0.0.1",
@@ -16,6 +16,14 @@
         "8000"
       ],
       "jinja": true
+    },
+    {
+      "name": "Crawler CLI (smoke test)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "src.main",
+      "cwd": "${workspaceFolder}",
+      "args": ["--limit", "1", "--no-db", "--no-headless", "--log-level", "DEBUG"]
     }
   ]
 }

@@ -1,72 +1,129 @@
 """
-Driver configuration - Selenium WebDriver setup
+Driver layer - Selenium WebDriver theo thread-local.
+
+Mỗi thread của ThreadPoolExecutor lấy driver riêng qua `get_driver()`; driver được tạo
+lazy lần đầu và tái sử dụng cho mọi sản phẩm mà thread đó xử lý. `quit_all()` đóng toàn bộ
+(đăng ký sẵn `atexit`, nhưng caller vẫn nên gọi trong `finally` để đóng sớm).
+
+Dùng Selenium Manager tích hợp (selenium >= 4.15) - KHÔNG cần webdriver-manager.
 """
-import os
-import stat
+import atexit
+import logging
+import threading
+from typing import Optional
+
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.support.ui import WebDriverWait
 
-_driver = None
+from src.config.settings import get_settings
+
+logger = logging.getLogger(__name__)
+
+_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+)
+
+_tls = threading.local()
+_drivers: list[WebDriver] = []
+_lock = threading.Lock()
+
+# Khi attach vào Chrome do người dùng tự mở, `quit_all()` KHÔNG được giết browser đó.
+_attach_address: Optional[str] = None
 
 
-def _fix_chromedriver_permissions(driver_path: str):
-    """Cấp quyền thực thi và xóa quarantine attribute cho ChromeDriver"""
+def set_attach_address(address: Optional[str]) -> None:
+    """Đặt `host:port` của Chrome remote-debugging để mọi driver mới attach vào."""
+    global _attach_address
+    _attach_address = address
+
+
+def build_options(headless: bool, attach_address: Optional[str] = None) -> ChromeOptions:
+    """Dựng ChromeOptions. Khi attach thì bỏ qua headless/window-size (browser đã chạy sẵn)."""
+    options = ChromeOptions()
+
+    if attach_address:
+        options.debugger_address = attach_address
+        return options
+
+    if headless:
+        options.add_argument("--headless=new")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-notifications")
+    options.add_argument(f"--user-agent={_USER_AGENT}")
+    options.add_experimental_option(
+        "prefs", {"profile.default_content_setting_values.notifications": 2}
+    )
+    # DOM sẵn sàng là đủ - mọi truy cập element đều đi qua explicit wait.
+    options.page_load_strategy = "eager"
+    return options
+
+
+def get_driver() -> WebDriver:
+    """Trả về WebDriver của thread hiện tại, tạo lazy lần đầu."""
+    driver = getattr(_tls, "driver", None)
+    if driver is not None:
+        return driver
+
+    settings = get_settings()
+    driver = webdriver.Chrome(options=build_options(settings.headless, _attach_address))
+    # Không trộn implicit wait với explicit wait.
+    driver.implicitly_wait(0)
+
+    _tls.driver = driver
+    with _lock:
+        _drivers.append(driver)
+    logger.info("Đã tạo driver mới cho thread %s", threading.current_thread().name)
+    return driver
+
+
+def get_wait(driver: WebDriver, timeout: Optional[float] = None) -> WebDriverWait:
+    """WebDriverWait với timeout mặc định lấy từ Settings."""
+    if timeout is None:
+        timeout = get_settings().wait_timeout
+    return WebDriverWait(driver, timeout, poll_frequency=0.3)
+
+
+def quit_current() -> None:
+    """Đóng driver của thread hiện tại."""
+    driver = getattr(_tls, "driver", None)
+    if driver is None:
+        return
+    _tls.driver = None
+    with _lock:
+        if driver in _drivers:
+            _drivers.remove(driver)
+    _quit_one(driver)
+
+
+def quit_all() -> None:
+    """Đóng mọi driver đã tạo. An toàn khi gọi nhiều lần."""
+    if _attach_address:
+        logger.warning(
+            "Đang attach vào Chrome %s - không quit browser của bạn.", _attach_address
+        )
+        with _lock:
+            _drivers.clear()
+        _tls.driver = None
+        return
+
+    with _lock:
+        drivers, _drivers[:] = list(_drivers), []
+    for driver in drivers:
+        _quit_one(driver)
+    _tls.driver = None
+
+
+def _quit_one(driver: WebDriver) -> None:
     try:
-        # Cấp quyền thực thi
-        os.chmod(driver_path, stat.S_IRWXU | stat.S_IRGRP |
-                 stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
-
-        # Xóa quarantine attribute (macOS Gatekeeper)
-        import subprocess
-        subprocess.run(['xattr', '-d', 'com.apple.quarantine', driver_path],
-                       capture_output=True, check=False)
-        print(f"✅ Đã cấp quyền cho ChromeDriver: {driver_path}")
-    except Exception as e:
-        print(f"⚠️ Không thể cấp quyền cho ChromeDriver: {e}")
+        driver.quit()
+    except Exception:  # driver có thể đã chết - đừng để lỗi teardown che lỗi thật
+        logger.debug("Bỏ qua lỗi khi quit driver", exc_info=True)
 
 
-def get_driver():
-    """Lấy WebDriver instance, tạo mới nếu chưa có"""
-    global _driver
-    if _driver is None:
-        print("Đang khởi tạo driver lần đầu tiên...")
-        try:
-            driver_path = ChromeDriverManager().install()
-            # Cấp quyền thực thi cho ChromeDriver (fix lỗi status code -9 trên macOS)
-            # _fix_chromedriver_permissions(driver_path)
-
-            _driver = webdriver.Chrome(service=Service(driver_path))
-            # _driver.get("https://www.thegioididong.com/")
-            # _driver.get(
-            #     "https://www.thegioididong.com/dtdd/iphone-16-pro-max?utm_recommendation=1")
-            # _driver.get(
-            #     "https://www.thegioididong.com/dtdd/tecno-spark-40c-4gb-128gb")
-            # _driver.get(
-            #     "https://www.thegioididong.com/sac-dtdd/pin-sac-du-phong-polymer-10000mah-type-c-pd-30w-baseus-qpow-2-ppqd4-10c")
-
-            print("Driver đã được khởi tạo thành công!")
-            return _driver
-        except Exception as e:
-            error_msg = str(e)
-            if "Status code was: -9" in error_msg or "unexpectedly exited" in error_msg:
-                print("\n❌ Lỗi ChromeDriver (Status code -9):")
-                print("   Đây là lỗi quyền truy cập trên macOS.")
-                print("   Thử các cách sau:")
-                print("   1. Xóa cache: rm -rf ~/.wdm/drivers/chromedriver")
-                print(
-                    "   2. Cấp quyền: chmod +x ~/.wdm/drivers/chromedriver/mac64/*/chromedriver-mac-arm64/chromedriver")
-                print("   3. Xóa quarantine: xattr -d com.apple.quarantine ~/.wdm/drivers/chromedriver/mac64/*/chromedriver-mac-arm64/chromedriver")
-            raise
-    else:
-        print("- Sử dụng driver đã tạo trước đó!")
-        return _driver
-
-
-def close_driver():
-    """Đóng WebDriver"""
-    global _driver
-    if _driver is not None:
-        _driver.quit()
-        _driver = None
-        print("Driver đã được đóng")
+atexit.register(quit_all)

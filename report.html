@@ -1,0 +1,67 @@
+<title>So sánh model phân tích cảm xúc</title>
+<style>
+:root { color-scheme: light dark; --fg:#111; --bg:#fff; --mut:#666; --line:#e5e5e5;
+        --bar:#2563eb; --base:#dc2626; --ok:#16a34a; }
+@media (prefers-color-scheme: dark) {
+  :root { --fg:#e8e8e8; --bg:#141414; --mut:#9a9a9a; --line:#333;
+          --bar:#60a5fa; --base:#f87171; --ok:#4ade80; } }
+* { box-sizing: border-box; }
+body { margin:0; padding:2rem 1.25rem; background:var(--bg); color:var(--fg);
+       font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+main { max-width: 60rem; margin: 0 auto; }
+h1 { font-size:1.6rem; margin:0 0 .25rem; }
+h2 { font-size:1.15rem; margin:2.5rem 0 .75rem; padding-bottom:.3rem;
+     border-bottom:1px solid var(--line); }
+h3 { font-size:1rem; margin:1.5rem 0 .5rem; }
+.sub { color:var(--mut); margin:0 0 1.5rem; font-size:.9rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; font-size:.9rem; }
+th,td { padding:.45rem .6rem; text-align:right; border-bottom:1px solid var(--line);
+        white-space:nowrap; }
+th:first-child, td:first-child { text-align:left; }
+thead th { color:var(--mut); font-weight:600; }
+tr.best td { font-weight:700; color:var(--ok); }
+tr.baseline td { color:var(--base); font-style:italic; }
+.cards { display:flex; flex-wrap:wrap; gap:.75rem; margin:1rem 0; }
+.card { border:1px solid var(--line); border-radius:.5rem; padding:.6rem .9rem; min-width:9rem; }
+.card b { display:block; font-size:1.35rem; }
+.card span { color:var(--mut); font-size:.8rem; }
+.err { border-left:3px solid var(--base); padding:.35rem .7rem; margin:.4rem 0;
+       color:var(--mut); font-size:.87rem; }
+.err b { color:var(--fg); }
+footer { margin-top:3rem; color:var(--mut); font-size:.82rem; }
+</style>
+<main>
+<h1>So sánh model phân tích cảm xúc</h1>
+<p class="sub">Train lúc 2026-07-31T17:31:52 ·
+seed 42 ·
+preprocessing v1.0</p>
+
+<h2>Tổng hợp</h2>
+<div class="scroll"><table><thead><tr><th>Model</th><th>macro-F1</th><th>Accuracy</th>
+<th>Train</th><th>Predict</th></tr></thead><tbody><tr class="best"><td>svm</td><td>0.833</td><td>0.875</td><td>3.2s</td><td>0.14s</td></tr><tr><td>nb</td><td>0.782</td><td>0.850</td><td>0.1s</td><td>0.01s</td></tr><tr><td>lstm</td><td>0.751</td><td>0.792</td><td>9.4s</td><td>0.31s</td></tr><tr class="baseline"><td>baseline (đoán "negative")</td><td>0.229</td><td>0.524</td><td>-</td><td>-</td></tr></tbody></table></div>
+<p class="sub">macro-F1 là chỉ số chính. Accuracy một mình gây hiểu nhầm khi lớp lệch nhau:
+model chỉ đoán lớp đa số vẫn đạt 0.524 accuracy.</p>
+
+<h2>macro-F1 so với baseline</h2>
+<svg viewBox="0 0 640 148" width="100%" height="148" role="img" aria-label="So sánh macro-F1"><text x="0" y="24" font-size="13" fill="currentColor">nb</text><rect x="90" y="8" width="383.0" height="22" rx="3" fill="var(--bar)"/><text x="481.0" y="24" font-size="12" fill="currentColor">0.782</text><text x="0" y="58" font-size="13" fill="currentColor">svm</text><rect x="90" y="42" width="408.3" height="22" rx="3" fill="var(--bar)"/><text x="506.3" y="58" font-size="12" fill="currentColor">0.833</text><text x="0" y="92" font-size="13" fill="currentColor">lstm</text><rect x="90" y="76" width="368.1" height="22" rx="3" fill="var(--bar)"/><text x="466.1" y="92" font-size="12" fill="currentColor">0.751</text><line x1="202.3" y1="4" x2="202.3" y2="108" stroke="var(--base)" stroke-width="2" stroke-dasharray="5 4"/><text x="90" y="136" font-size="12" fill="var(--base)">baseline (luôn đoán "negative"): macro-F1 0.229</text></svg>
+
+<h2>Dữ liệu</h2>
+<div class="cards">
+<div class="card"><b>3853</b><span>dòng thô</span></div>
+<div class="card"><b>3128</b><span>sau làm sạch</span></div>
+<div class="card"><b>2502</b><span>train</span></div>
+<div class="card"><b>626</b><span>test</span></div>
+</div>
+<div class="cards"><div class="card"><b>1637</b><span>negative</span></div><div class="card"><b>1169</b><span>positive</span></div><div class="card"><b>322</b><span>neutral</span></div></div>
+<p class="sub">Đã bỏ: 3 dòng rỗng ·
+0 nhãn không hợp lệ ·
+0 mâu thuẫn nhãn ·
+722 trùng nội dung.
+Khử trùng TRƯỚC khi chia train/test để không rò rỉ dữ liệu.</p>
+
+<h2>Chi tiết từng model</h2>
+<h3>nb</h3><div class="scroll"><table><thead><tr><th>Lớp</th><th>Precision</th><th>Recall</th><th>F1</th><th>Support</th></tr></thead><tbody><tr><td>negative</td><td>0.861</td><td>0.887</td><td>0.874</td><td>328</td></tr><tr><td>neutral</td><td>0.744</td><td>0.500</td><td>0.598</td><td>64</td></tr><tr><td>positive</td><td>0.853</td><td>0.893</td><td>0.873</td><td>234</td></tr></tbody></table></div><div class="scroll"><table><thead><tr><th></th><th>đoán negative</th><th>đoán neutral</th><th>đoán positive</th></tr></thead><tbody><tr><td>thật negative</td><td style="background:rgba(22,163,74,0.750)">291</td><td style="background:rgba(220,38,38,0.029)">6</td><td style="background:rgba(220,38,38,0.149)">31</td></tr><tr><td>thật neutral</td><td style="background:rgba(220,38,38,0.129)">27</td><td style="background:rgba(22,163,74,0.153)">32</td><td style="background:rgba(220,38,38,0.024)">5</td></tr><tr><td>thật positive</td><td style="background:rgba(220,38,38,0.096)">20</td><td style="background:rgba(220,38,38,0.024)">5</td><td style="background:rgba(22,163,74,0.750)">209</td></tr></tbody></table></div><h3>svm</h3><div class="scroll"><table><thead><tr><th>Lớp</th><th>Precision</th><th>Recall</th><th>F1</th><th>Support</th></tr></thead><tbody><tr><td>negative</td><td>0.893</td><td>0.890</td><td>0.892</td><td>328</td></tr><tr><td>neutral</td><td>0.667</td><td>0.750</td><td>0.706</td><td>64</td></tr><tr><td>positive</td><td>0.916</td><td>0.889</td><td>0.902</td><td>234</td></tr></tbody></table></div><div class="scroll"><table><thead><tr><th></th><th>đoán negative</th><th>đoán neutral</th><th>đoán positive</th></tr></thead><tbody><tr><td>thật negative</td><td style="background:rgba(22,163,74,0.750)">292</td><td style="background:rgba(220,38,38,0.096)">20</td><td style="background:rgba(220,38,38,0.077)">16</td></tr><tr><td>thật neutral</td><td style="background:rgba(220,38,38,0.062)">13</td><td style="background:rgba(22,163,74,0.230)">48</td><td style="background:rgba(220,38,38,0.014)">3</td></tr><tr><td>thật positive</td><td style="background:rgba(220,38,38,0.105)">22</td><td style="background:rgba(220,38,38,0.019)">4</td><td style="background:rgba(22,163,74,0.750)">208</td></tr></tbody></table></div><h3>lstm</h3><div class="scroll"><table><thead><tr><th>Lớp</th><th>Precision</th><th>Recall</th><th>F1</th><th>Support</th></tr></thead><tbody><tr><td>negative</td><td>0.841</td><td>0.790</td><td>0.814</td><td>328</td></tr><tr><td>neutral</td><td>0.516</td><td>0.766</td><td>0.616</td><td>64</td></tr><tr><td>positive</td><td>0.843</td><td>0.803</td><td>0.823</td><td>234</td></tr></tbody></table></div><div class="scroll"><table><thead><tr><th></th><th>đoán negative</th><th>đoán neutral</th><th>đoán positive</th></tr></thead><tbody><tr><td>thật negative</td><td style="background:rgba(22,163,74,0.750)">259</td><td style="background:rgba(220,38,38,0.177)">37</td><td style="background:rgba(220,38,38,0.153)">32</td></tr><tr><td>thật neutral</td><td style="background:rgba(220,38,38,0.058)">12</td><td style="background:rgba(22,163,74,0.235)">49</td><td style="background:rgba(220,38,38,0.014)">3</td></tr><tr><td>thật positive</td><td style="background:rgba(220,38,38,0.177)">37</td><td style="background:rgba(220,38,38,0.043)">9</td><td style="background:rgba(22,163,74,0.750)">188</td></tr></tbody></table></div>
+<h2>Ví dụ svm đoán sai</h2><div class="err"><b>thật positive → đoán negative</b><br>Mực tốt không còn bị hiện những dấu trên giấy.</div><div class="err"><b>thật neutral → đoán negative</b><br>cái này cái khóa màng hình o đâu vậy ak</div><div class="err"><b>thật negative → đoán neutral</b><br>Mình hôm nay mới mua . có phiếu mua hàng 300 . có sạc và ốp lưng... chỗ khác phiếu mua hàng 700 . Cho xin cau trả lời</div><div class="err"><b>thật negative → đoán neutral</b><br>Mình có một góp ý cho những ai đang muốn mua thì là phần chân đế của nó là lắp vào nên không thể nâng lên hay hạ xuống được nhé . Nếu muốn vừa vặn thì cần một giá treo khác.</div><div class="err"><b>thật neutral → đoán negative</b><br>Đơn hàng của tui có phải huỷ rồi ko</div><div class="err"><b>thật neutral → đoán negative</b><br>Làm sao tắt âm thanh nhấn phím, tìm mãi không thấy</div><div class="err"><b>thật positive → đoán negative</b><br>mh mua s25 ngày 29/8 mọi thứ đều ổn.chỉ có gọi video zalo là bị vàng có cách nào khắc phục không qtv.mình đã gỡ cài đặt tải lại và khởi động máy mà cũng không hết.dùng điện thoại khác gọi thì rất ok..</div><div class="err"><b>thật positive → đoán neutral</b><br>Nice</div><div class="err"><b>thật negative → đoán neutral</b><br>Chào anh chị, em mới mua 27/4, khui máy mới ra thấy 1 đường đứt ngang thẳng, e hỏi nhân viên bảo đường phay cắt, ko phải lỗi đâu dùng ít bữa sẽ mất.Vậy dùng ít hôm nữa có mất đường phay cắt trên ko an</div><div class="err"><b>thật positive → đoán neutral</b><br>Đáp ứng toàn diện yêu cầu cơ bản, nếu ko chơi game nặng, thì con này 10/10đ</div>
+<footer>Sinh bởi <code>python -m src.analyze evaluate</code> · trang tự chứa, không tải gì từ mạng.</footer>
+</main>

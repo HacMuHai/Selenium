@@ -56,11 +56,13 @@ geckodriver
 # ~/.wdm/
 
 # Excel output files (generated data)
-excel_comment/
-excel_comment2/
-excel_tag/
+excel_*/
 *.xlsx
-!requirements.xlsx  # Uncomment and adjust if you have template files to keep
+
+# Artifact model da train
+models_store/
+*.keras
+*.joblib
 
 # Data files
 text.json

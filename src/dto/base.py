@@ -1,17 +1,16 @@
 """
-Base DTOs dùng chung cho tất cả APIs
+Base DTO dùng chung cho tất cả API. Mọi response - kể cả lỗi - đều giữ envelope này.
 """
-import inspect
-import os
-from typing import Optional, Generic, TypeVar
+from typing import Generic, Optional, TypeVar
+
 from pydantic import BaseModel
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class BaseResponse(BaseModel, Generic[T]):
-    """Response model chung cho tất cả API endpoints"""
+    """Envelope chung: `{data, success, message}`."""
+
     data: Optional[T] = None
     success: bool
     message: str
-    position: Optional[str] = None  # Format: "filename.function_name" để debug

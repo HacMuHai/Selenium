@@ -1,6 +1,17 @@
-selenium
-webdriver-manager
-pymongo
+selenium>=4.15
+pymongo[srv]>=4.9
+certifi
 fastapi
-uvicorn
-pydantic
+uvicorn[standard]
+pydantic>=2
+pydantic-settings>=2
+openpyxl
+pytest
+mongomock
+httpx
+
+# Phân tích cảm xúc (tensorflow ~600MB, chỉ cần khi dùng LSTM)
+scikit-learn
+pandas
+joblib
+tensorflow

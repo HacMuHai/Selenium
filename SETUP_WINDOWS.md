@@ -79,9 +79,9 @@ Selenium cần Chrome browser để chạy:
    pip install -r requirements.txt
    ```
    - Lệnh này sẽ cài đặt tất cả các thư viện cần thiết:
-     - selenium
-     - webdriver-manager
+     - selenium (kem Selenium Manager, tu tai ChromeDriver)
      - pymongo
+     - pydantic-settings
      - fastapi
      - uvicorn
      - pydantic
@@ -112,27 +112,26 @@ Selenium cần Chrome browser để chạy:
    venv\Scripts\activate
    ```
 
-2. **Chạy script chính:**
+2. **Chạy script chính** (LUÔN chạy từ thư mục gốc của repo):
    ```bash
-   python src\main.py
+   python -m src.main --category phu-kien
    ```
-   - Script sẽ bắt đầu scrape dữ liệu từ thegioididong.com
-   - Dữ liệu sẽ được lưu vào MongoDB (đã cấu hình sẵn connection string)
+   - Xem toàn bộ flag: `python -m src.main --help`
+   - Dữ liệu lưu vào MongoDB theo `MONGO_URI` trong file `.env`
 
-### Cách 2: Chạy Development Mode (Hot Reload)
+### Cách 2: Smoke test nhanh (không đụng MongoDB)
 
 1. **Kích hoạt virtual environment:**
    ```bash
    venv\Scripts\activate
    ```
 
-2. **Chạy development server:**
+2. **Chạy 1 sản phẩm, hiện cửa sổ Chrome:**
    ```bash
-   python src\run.py
+   python -m src.main --limit 1 --no-db --no-headless --log-level DEBUG
    ```
-   - Driver sẽ được giữ chạy
-   - Khi sửa code, chỉ cần nhấn Enter để reload và chạy lại
-   - Nhấn `Ctrl+C` để dừng
+   - Hoặc double-click `run_dev.bat`
+   - `run.py` (hot reload) đã bị xoá; xem mục `--attach` trong README nếu muốn giữ browser
 
 ### Cách 3: Export dữ liệu ra Excel
 
@@ -143,10 +142,10 @@ Selenium cần Chrome browser để chạy:
 
 2. **Chạy export:**
    ```bash
-   python src\main.py
+   python -m src.main --export-only --export excel_comment
    ```
-   - Trong file `main.py`, hàm `export_to_excel()` sẽ export dữ liệu từ MongoDB ra file Excel
-   - File Excel sẽ được lưu trong thư mục `excel_comment2/`
+   - Chỉ đọc MongoDB và ghi Excel, không mở Chrome
+   - File Excel lưu trong thư mục truyền vào `--export` (mặc định `EXPORT_DIR` trong `.env`)
 
 ### Cách 4: Chạy FastAPI Server (nếu cần)
 
@@ -187,11 +186,11 @@ python -m pip install -r requirements.txt
 **Nguyên nhân:** ChromeDriver không tương thích với phiên bản Chrome
 
 **Giải pháp:**
-- `webdriver-manager` sẽ tự động tải ChromeDriver phù hợp
+- Selenium Manager (có sẵn trong selenium >= 4.15) tự tải ChromeDriver phù hợp
 - Đảm bảo Chrome đã được cập nhật lên phiên bản mới nhất
-- Nếu vẫn lỗi, xóa cache:
+- Nếu vẫn lỗi, xóa cache rồi chạy lại (cần mạng để tải lại):
   ```bash
-  rmdir /s %USERPROFILE%\.wdm
+  rmdir /s %USERPROFILE%\.cache\selenium
   ```
   Sau đó chạy lại script
 
@@ -242,14 +241,21 @@ venv\Scripts\activate
 # 3. Cài đặt dependencies (chỉ cần làm 1 lần sau khi tạo venv)
 pip install -r requirements.txt
 
-# 4. Chạy dự án
-python src\main.py
+# 4. Tao file .env (chi can lam 1 lan)
+copy .env.example .env
+REM roi mo .env dien MONGO_URI
 
-# 5. Chạy development mode
-python src\run.py
+# 5. Chạy dự án
+python -m src.main --category phu-kien
 
-# 6. Chạy FastAPI server
+# 6. Smoke test nhanh
+python -m src.main --limit 1 --no-db --no-headless
+
+# 7. Chạy FastAPI server
 uvicorn src.app:app --reload
+
+# 8. Chạy test
+python -m pytest -q
 ```
 
 ## Kiểm tra nhanh
@@ -257,7 +263,7 @@ uvicorn src.app:app --reload
 Sau khi cài đặt, chạy lệnh này để kiểm tra mọi thứ đã sẵn sàng:
 
 ```bash
-python -c "import selenium, pymongo, fastapi, openpyxl; print('✅ Tất cả dependencies đã sẵn sàng!')"
+python -c "from src.config.settings import get_settings; print('OK, db =', get_settings().mongo_db)"
 ```
 
 Nếu không có lỗi, bạn đã sẵn sàng chạy dự án!

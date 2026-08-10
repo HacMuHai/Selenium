@@ -1,85 +1,72 @@
 """
-Database configuration - MongoDB connection
+MongoDB connection - một client duy nhất cho mỗi process (dùng chung cho CLI lẫn API).
+
+KHÔNG ping ở mỗi lần lấy collection: pymongo đã có topology monitor riêng, ping mỗi call
+chỉ thêm một round-trip vô ích. Ping đúng 1 lần lúc tạo client để fail fast.
 """
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
+import logging
+from functools import lru_cache
 from typing import Optional
-import sys
 
-# Cấu hình MongoDB
-MONGO_URI = "mongodb+srv://selenium_db:selenium_pw123@cluster0.1cqkft2.mongodb.net/?appName=Cluster0"
-DATABASE_NAME = "selenium_scraper"
-# COLLECTION_NAME = "comments"
+import certifi
+from pymongo import MongoClient
+from pymongo.collection import Collection
+from pymongo.database import Database
+from pymongo.errors import PyMongoError
+from pymongo.server_api import ServerApi
 
-# Lưu connection vào sys.modules để không bị mất khi reload module
-_MODULE_NAME = __name__
+from src.config.settings import get_settings
 
-
-def _get_storage():
-    """Lấy storage để lưu connections (không bị reset khi reload)"""
-    if not hasattr(sys.modules[_MODULE_NAME], '_storage'):
-        sys.modules[_MODULE_NAME]._storage = {
-            '_client': None,
-            '_database': None,
-            '_collection': None
-        }
-    return sys.modules[_MODULE_NAME]._storage
+logger = logging.getLogger(__name__)
 
 
-def get_mongo_client() -> MongoClient:
-    """Lấy MongoDB client, tạo mới nếu chưa có hoặc connection đã đóng"""
-    storage = _get_storage()
-    _client = storage['_client']
+@lru_cache
+def get_client() -> MongoClient:
+    """MongoClient singleton. Ping 1 lần để fail fast khi URI/mạng sai."""
+    settings = get_settings()
+    client = MongoClient(
+        settings.mongo_uri,
+        server_api=ServerApi("1"),
+        tlsCAFile=certifi.where(),
+    )
+    client.admin.command("ping")
+    # KHÔNG log mongo_uri - chứa password.
+    logger.info("Đã kết nối MongoDB (db=%s)", settings.mongo_db)
+    return client
 
-    # Kiểm tra connection có tồn tại và còn sống không
-    if _client is None or not _is_connection_alive(_client):
-        _client = MongoClient(MONGO_URI, server_api=ServerApi('1'))
-        print("MongoClient", _is_connection_alive(_client))
-        storage['_client'] = _client
-        print(f"Đã kết nối MongoDB tại {MONGO_URI}")
-    else:
-        print("- Sử dụng client đã kết nối!")
-    return _client
+
+def get_db() -> Database:
+    """Database mặc định theo `settings.mongo_db`."""
+    return get_client()[get_settings().mongo_db]
 
 
-def _is_connection_alive(client: MongoClient) -> bool:
-    """Kiểm tra xem MongoDB connection có còn sống không"""
+def get_collection(name: Optional[str] = None) -> Collection:
+    """Collection theo tên; mặc định `settings.mongo_collection`."""
+    return get_db()[name or get_settings().mongo_collection]
+
+
+def ensure_indexes(collection: Optional[Collection] = None) -> None:
+    """Tạo index cần cho API/crawler. Không chặn startup nếu tạo lỗi."""
+    col = collection if collection is not None else get_collection()
     try:
-        # Ping server để kiểm tra connection
-        client.admin.command('ping')
-        return True
-    except Exception:
-        return False
+        col.create_index([("comments.id", 1)], name="comments_id_idx")
+    except PyMongoError:
+        logger.warning("Không tạo được index comments.id", exc_info=True)
+    try:
+        col.create_index([("link", 1)], unique=True, name="link_unique_idx")
+    except PyMongoError:
+        # Dữ liệu cũ có thể đang có link trùng -> chỉ cảnh báo, không crash.
+        logger.warning(
+            "Không tạo được unique index trên `link` (có thể do dữ liệu trùng)",
+            exc_info=True,
+        )
 
 
-def get_database():
-    """Lấy database, tạo mới nếu chưa có"""
-    storage = _get_storage()
-    _database = storage['_database']
-
-    if _database is None:
-        client = get_mongo_client()
-        _database = client[DATABASE_NAME]
-        storage['_database'] = _database
-    else:
-        print("- Sử dụng database đã kết nối!")
-    return _database
-
-
-def get_collection(collection_name: str):
-    """Lấy collection theo collection_name"""
-    db = get_database()
-    return db[collection_name]
-
-
-def close_connection():
-    """Đóng kết nối MongoDB"""
-    storage = _get_storage()
-    _client = storage.get('_client')
-
-    if _client:
-        _client.close()
-        storage['_client'] = None
-        storage['_database'] = None
-        storage['_collection'] = None
-        print("Đã đóng kết nối MongoDB")
+def close_client() -> None:
+    """Đóng client và xoá cache để lần sau tạo lại."""
+    if get_client.cache_info().currsize == 0:
+        return
+    client = get_client()
+    client.close()
+    get_client.cache_clear()
+    logger.info("Đã đóng kết nối MongoDB")

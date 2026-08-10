@@ -1,9 +1,9 @@
 """
-Config module - Cấu hình ứng dụng
+Config module.
+
+Cố ý KHÔNG re-export database/driver ở đây: `driver.py` import `settings.py`, mà import
+`src.config.settings` lại chạy file này trước -> vòng lặp import. Import thẳng module con.
 """
-from .database import get_collection, close_connection
-from .driver import get_driver, close_driver
 from . import version
 
-__all__ = ["get_collection", "close_connection",
-           "get_driver", "close_driver", "version"]
+__all__ = ["version"]
