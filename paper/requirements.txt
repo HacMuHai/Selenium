@@ -1,0 +1,13 @@
+# Chỉ những gì cần để sinh hình cho bài báo.
+# KHÔNG có selenium / pymongo / fastapi / uvicorn - folder này không crawl, không
+# đụng database, không dựng server.
+matplotlib
+pandas
+openpyxl
+
+# Chỉ cần nếu muốn HUẤN LUYỆN LẠI để sinh metadata.json mới
+# (paper/analysis/trainer.py). Vẽ hình từ metadata.json có sẵn thì không cần.
+# tensorflow nặng ~600MB.
+# scikit-learn
+# joblib
+# tensorflow

@@ -1,0 +1,7 @@
+﻿Thuật toán,"Precision
+Tiêu cực | Trung lập | Tích cực","Recall
+Tiêu cực | Trung lập | Tích cực","Thời gian
+huấn luyện"
+Naive Bayes,"86,1% | 74,4% | 85,3%","88,7% | 50,0% | 89,3%","0,06 s"
+SVM,"89,3% | 66,7% | 91,6%","89,0% | 75,0% | 88,9%","3,22 s"
+LSTM,"84,1% | 51,6% | 84,3%","79,0% | 76,6% | 80,3%","9,40 s"

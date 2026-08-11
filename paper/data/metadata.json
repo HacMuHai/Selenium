@@ -1,0 +1,337 @@
+{
+  "schema": 1,
+  "trained_at": "2026-07-31T17:31:52",
+  "seed": 42,
+  "test_size": 0.2,
+  "preprocessing_version": "1.0",
+  "sklearn_version": "1.9.0",
+  "dataset": {
+    "total_rows": 3853,
+    "dropped_empty": 3,
+    "dropped_bad_label": 0,
+    "dropped_conflict": 0,
+    "dropped_duplicate": 722,
+    "skipped_files": [],
+    "final_rows": 3128,
+    "label_counts": {
+      "negative": 1637,
+      "positive": 1169,
+      "neutral": 322
+    }
+  },
+  "split": {
+    "train": 2502,
+    "test": 626,
+    "train_labels": {
+      "negative": 1309,
+      "positive": 935,
+      "neutral": 258
+    },
+    "test_labels": {
+      "negative": 328,
+      "positive": 234,
+      "neutral": 64
+    }
+  },
+  "baseline": {
+    "label": "negative",
+    "accuracy": 0.5239616613418531,
+    "macro_f1": 0.2292103424178896
+  },
+  "models": {
+    "nb": {
+      "train_seconds": 0.06415700000070501,
+      "metrics": {
+        "n": 626,
+        "accuracy": 0.8498402555910544,
+        "macro_f1": 0.7815520239963688,
+        "per_class": {
+          "negative": {
+            "precision": 0.8609467455621301,
+            "recall": 0.8871951219512195,
+            "f1": 0.8738738738738739,
+            "support": 328
+          },
+          "neutral": {
+            "precision": 0.7441860465116279,
+            "recall": 0.5,
+            "f1": 0.5981308411214953,
+            "support": 64
+          },
+          "positive": {
+            "precision": 0.8530612244897959,
+            "recall": 0.8931623931623932,
+            "f1": 0.8726513569937371,
+            "support": 234
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 291,
+            "neutral": 6,
+            "positive": 31
+          },
+          "neutral": {
+            "negative": 27,
+            "neutral": 32,
+            "positive": 5
+          },
+          "positive": {
+            "negative": 20,
+            "neutral": 5,
+            "positive": 209
+          }
+        },
+        "predict_seconds": 0.012489791988627985,
+        "errors_sample": [
+          {
+            "text": "Mua k dc nhân viên tư vấn giảm 200k",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Muốn đổi máy lại qua Samsung a56 , tư vấn giúp mình với",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Mình hôm nay mới mua . có phiếu mua hàng 300 . có sạc và ốp lưng... chỗ khác phiếu mua hàng 700 . Cho xin cau trả lời",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Mình có một góp ý cho những ai đang muốn mua thì là phần chân đế của nó là lắp vào nên không thể nâng lên hay hạ xuống được nhé . Nếu muốn vừa vặn thì cần một giá treo khác.",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Đơn hàng của tui có phải huỷ rồi ko",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Làm sao tắt âm thanh nhấn phím, tìm mãi không thấy",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "mh mua s25 ngày 29/8 mọi thứ đều ổn.chỉ có gọi video zalo là bị vàng có cách nào khắc phục không qtv.mình đã gỡ cài đặt tải lại và khởi động máy mà cũng không hết.dùng điện thoại khác gọi thì rất ok..",
+            "true": "positive",
+            "pred": "negative"
+          },
+          {
+            "text": "Nice",
+            "true": "positive",
+            "pred": "neutral"
+          },
+          {
+            "text": "Máy build ngon, cứng cáp, cấu hình ổn, màn hình đẹp + trackpad to, nhiệt độ giới hạn ở 60 70 độ C nhưng game vẫn khoẻ.Vấn đề là, trên page TGDĐ ghi rằng còn hỗ trợ 1 khe SSD M.2 NVME Gen 4 nhưng khi m",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Trước dùng máy in 2321D thấy rất ổn, rất tin tưởng hãng Brother. Vậy nên đổi máy vẫn mua Brother.",
+            "true": "positive",
+            "pred": "negative"
+          }
+        ]
+      }
+    },
+    "svm": {
+      "train_seconds": 3.218492125000921,
+      "metrics": {
+        "n": 626,
+        "accuracy": 0.8753993610223643,
+        "macro_f1": 0.8332905078376501,
+        "per_class": {
+          "negative": {
+            "precision": 0.8929663608562691,
+            "recall": 0.8902439024390244,
+            "f1": 0.8916030534351146,
+            "support": 328
+          },
+          "neutral": {
+            "precision": 0.6666666666666666,
+            "recall": 0.75,
+            "f1": 0.7058823529411765,
+            "support": 64
+          },
+          "positive": {
+            "precision": 0.9162995594713657,
+            "recall": 0.8888888888888888,
+            "f1": 0.9023861171366594,
+            "support": 234
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 292,
+            "neutral": 20,
+            "positive": 16
+          },
+          "neutral": {
+            "negative": 13,
+            "neutral": 48,
+            "positive": 3
+          },
+          "positive": {
+            "negative": 22,
+            "neutral": 4,
+            "positive": 208
+          }
+        },
+        "predict_seconds": 0.1368061669927556,
+        "errors_sample": [
+          {
+            "text": "Mực tốt không còn bị hiện những dấu trên giấy.",
+            "true": "positive",
+            "pred": "negative"
+          },
+          {
+            "text": "cái này cái khóa màng hình o đâu vậy ak",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Mình hôm nay mới mua . có phiếu mua hàng 300 . có sạc và ốp lưng... chỗ khác phiếu mua hàng 700 . Cho xin cau trả lời",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Mình có một góp ý cho những ai đang muốn mua thì là phần chân đế của nó là lắp vào nên không thể nâng lên hay hạ xuống được nhé . Nếu muốn vừa vặn thì cần một giá treo khác.",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Đơn hàng của tui có phải huỷ rồi ko",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Làm sao tắt âm thanh nhấn phím, tìm mãi không thấy",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "mh mua s25 ngày 29/8 mọi thứ đều ổn.chỉ có gọi video zalo là bị vàng có cách nào khắc phục không qtv.mình đã gỡ cài đặt tải lại và khởi động máy mà cũng không hết.dùng điện thoại khác gọi thì rất ok..",
+            "true": "positive",
+            "pred": "negative"
+          },
+          {
+            "text": "Nice",
+            "true": "positive",
+            "pred": "neutral"
+          },
+          {
+            "text": "Chào anh chị, em mới mua 27/4, khui máy mới ra thấy 1 đường đứt ngang thẳng, e hỏi nhân viên bảo đường phay cắt, ko phải lỗi đâu dùng ít bữa sẽ mất.Vậy dùng ít hôm nữa có mất đường phay cắt trên ko an",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Đáp ứng toàn diện yêu cầu cơ bản, nếu ko chơi game nặng, thì con này 10/10đ",
+            "true": "positive",
+            "pred": "neutral"
+          }
+        ]
+      }
+    },
+    "lstm": {
+      "train_seconds": 9.40390987500723,
+      "metrics": {
+        "n": 626,
+        "accuracy": 0.792332268370607,
+        "macro_f1": 0.7511915738867558,
+        "per_class": {
+          "negative": {
+            "precision": 0.8409090909090909,
+            "recall": 0.7896341463414634,
+            "f1": 0.8144654088050315,
+            "support": 328
+          },
+          "neutral": {
+            "precision": 0.5157894736842106,
+            "recall": 0.765625,
+            "f1": 0.6163522012578617,
+            "support": 64
+          },
+          "positive": {
+            "precision": 0.8430493273542601,
+            "recall": 0.8034188034188035,
+            "f1": 0.8227571115973742,
+            "support": 234
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 259,
+            "neutral": 37,
+            "positive": 32
+          },
+          "neutral": {
+            "negative": 12,
+            "neutral": 49,
+            "positive": 3
+          },
+          "positive": {
+            "negative": 37,
+            "neutral": 9,
+            "positive": 188
+          }
+        },
+        "predict_seconds": 0.31144154199864715,
+        "errors_sample": [
+          {
+            "text": "Mực tốt không còn bị hiện những dấu trên giấy.",
+            "true": "positive",
+            "pred": "negative"
+          },
+          {
+            "text": "Mua k dc nhân viên tư vấn giảm 200k",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "cái này cái khóa màng hình o đâu vậy ak",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Mình hôm nay mới mua . có phiếu mua hàng 300 . có sạc và ốp lưng... chỗ khác phiếu mua hàng 700 . Cho xin cau trả lời",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "dạ cho e hỏi máy e mới mua nhưng chỉ sạc được tới 99% thôi ạ",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "đã mua 2 cái,. Cái đầu tiên thì dmx có kích hoạt bảo hành điện tử. cái thứ 2 chưa kích hoạt bảo hành điện tử. cảm thấy chưa hài lòng về việc này",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Đơn hàng của tui có phải huỷ rồi ko",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "máy mình mua đợt mới ra dùng đến bây giờ cũng gần năm mà màn hình tự bong ra bên mình còn hỗ trợ sửa không ạ",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Máy đểu. Gọi điện có tiếng réo lên gớm bỏ mẹ. Mua phí tiền.",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "mh mua s25 ngày 29/8 mọi thứ đều ổn.chỉ có gọi video zalo là bị vàng có cách nào khắc phục không qtv.mình đã gỡ cài đặt tải lại và khởi động máy mà cũng không hết.dùng điện thoại khác gọi thì rất ok..",
+            "true": "positive",
+            "pred": "negative"
+          }
+        ]
+      }
+    }
+  }
+}
