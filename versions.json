@@ -1,5 +1,27 @@
 [
   {
+    "trained_at": "2026-08-12T11:45:47",
+    "total_rows": 4762,
+    "final_rows": 4037,
+    "label_counts": {
+      "negative": 1958,
+      "positive": 1702,
+      "neutral": 377
+    },
+    "split": {
+      "train": 3229,
+      "test": 808
+    },
+    "models": {
+      "svm": 0.831,
+      "lstm_w2v": 0.806,
+      "lstm": 0.762,
+      "nb": 0.719
+    },
+    "id": "v3-12082026",
+    "label": "Thêm LSTM+PhoW2V và bảng 2 lớp"
+  },
+  {
     "trained_at": "2026-08-12T09:39:21",
     "total_rows": 4762,
     "final_rows": 4037,
