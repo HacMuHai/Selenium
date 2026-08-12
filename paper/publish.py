@@ -16,7 +16,10 @@ from pathlib import Path
 
 # Số của từng phiên bản đọc từ metadata.json lúc train, KHÔNG chép tay: chép tay là
 # nguồn số liệu thứ hai, và nó sẽ lệch với hình ngay lần deploy vội đầu tiên.
-MODEL_TEN = {"svm": "SVM", "lstm": "LSTM", "nb": "Naive Bayes"}
+MODEL_TEN = {"svm": "SVM", "lstm": "LSTM", "nb": "Naive Bayes", "lstm_w2v": "LSTM + PhoW2V"}
+# Bản ngắn cho thanh đầu trang (hẹp). Không dùng `.upper()`: "lstm_w2v" thành
+# "LSTM_W2V", đọc như tên biến chứ không phải tên mô hình.
+MODEL_TAT = {"svm": "SVM", "lstm": "LSTM", "nb": "NB", "lstm_w2v": "LSTM+W2V"}
 
 
 def doc_metadata(path: Path) -> dict:
@@ -72,7 +75,7 @@ def sinh_index(site: Path, versions: list[dict]) -> None:
             "id": v["id"], "label": v["label"], "ngay": v["trained_at"][:10],
             "final_rows": so(v["final_rows"]), "total_rows": so(v["total_rows"]),
             # Thanh đầu trang hẹp -> viết tắt tên model. Tên đầy đủ có trong báo cáo.
-            "f1": " · ".join(f"{k.upper()} {s:.3f}".replace(".", ",")
+            "f1": " · ".join(f"{MODEL_TAT.get(k, k.upper())} {s:.3f}".replace(".", ",")
                              for k, s in v["models"].items()),
         }
         for v in versions
@@ -164,11 +167,31 @@ def main() -> None:
     p.add_argument("--out", default="paper/out", help="Thư mục hình vừa build")
     p.add_argument("--metadata", default="paper/data/metadata.json")
     p.add_argument("--version", required=True, help="Mã phiên bản, ví dụ v3 (ngày tự thêm)")
-    p.add_argument("--label", default="", help="Mô tả ngắn phiên bản")
+    p.add_argument("--label", default="", help="Mô tả phiên bản này nâng cấp những gì")
     p.add_argument("--id-file", help="Ghi mã phiên bản đầy đủ ra file, cho deploy.sh đọc")
+    p.add_argument("--relabel", action="store_true",
+                   help="Chỉ sửa mô tả của phiên bản đã có, không đụng vào hình")
     a = p.parse_args()
 
     site, out = Path(a.site), Path(a.out)
+
+    if a.relabel:
+        # Sửa mô tả bản cũ: số liệu giữ nguyên trong versions.json, metadata.json hiện
+        # tại là của bản MỚI nên không được đọc lại - đọc vào là ghi đè số của bản cũ.
+        versions = nap_versions(site)
+        for v in versions:
+            if v["id"] == a.version:
+                v["label"] = a.label
+                break
+        else:
+            raise SystemExit(f"Không thấy phiên bản {a.version} trên site")
+        site.joinpath("versions.json").write_text(
+            json.dumps(versions, ensure_ascii=False, indent=2)
+        )
+        sinh_index(site, versions)
+        print(f"  {a.version}: đã đổi mô tả")
+        return
+
     ban = doc_metadata(Path(a.metadata))
     ma = ma_phien_ban(a.version, ban["trained_at"])
 
