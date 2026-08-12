@@ -45,82 +45,100 @@ def so(n: int) -> str:
 
 
 def sinh_index(site: Path, versions: list[dict]) -> None:
-    """Trang gốc: bảng các phiên bản, mới nhất trên cùng, kèm số liệu chính."""
-    moi_nhat = versions[0]["id"] if versions else ""
-    hang = []
-    for i, v in enumerate(versions):
-        # Thay dấu thập phân TỪNG SỐ MỘT. Thay trên cả dòng HTML thì dấu chấm
-        # hàng nghìn của `so()` cũng bị đổi ngược lại thành dấu phẩy.
-        f1 = " · ".join(f"{MODEL_TEN.get(k, k)} {s:.3f}".replace(".", ",")
-                        for k, s in v["models"].items())
-        nhan = '<span class="badge">mới nhất</span>' if i == 0 else ""
-        ngay = v["trained_at"][:10]
-        hang.append(f"""    <tr>
-      <td><a href="{v['id']}/">{v['id']}</a> {nhan}<div class="mut">{v['label']}</div></td>
-      <td>{ngay}</td>
-      <td class="num">{so(v['final_rows'])}</td>
-      <td class="num">{so(v['total_rows'])}</td>
-      <td class="f1">{f1}</td>
-    </tr>""")
+    """Trang gốc: thanh chọn phiên bản + báo cáo, mặc định mở bản mới nhất.
+
+    Báo cáo hiện qua `<iframe>` chứ không nhúng thẳng nội dung vào. Nhúng thẳng thì
+    phải viết lại đường dẫn ảnh (`bang/x.png` -> `v2/bang/x.png`) và khởi động lại
+    script lightbox của trang con - hai chỗ dễ hỏng âm thầm khi báo cáo đổi cấu trúc.
+    Iframe giữ mỗi phiên bản đã lưu chạy y như lúc build, không đụng vào.
+    """
+    # Nhúng thẳng dữ liệu vào trang, không fetch versions.json: mở bằng file:// vẫn chạy.
+    data = json.dumps([
+        {
+            "id": v["id"], "label": v["label"], "ngay": v["trained_at"][:10],
+            "final_rows": so(v["final_rows"]), "total_rows": so(v["total_rows"]),
+            # Thanh đầu trang hẹp -> viết tắt tên model. Tên đầy đủ có trong báo cáo.
+            "f1": " · ".join(f"{k.upper()} {s:.3f}".replace(".", ",")
+                             for k, s in v["models"].items()),
+        }
+        for v in versions
+    ], ensure_ascii=False)
 
     site.joinpath("index.html").write_text(f"""<!doctype html>
 <html lang="vi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Phân tích cảm xúc bình luận – các phiên bản báo cáo</title>
+<title>Phân tích cảm xúc bình luận – báo cáo</title>
 <style>
-:root {{ --bg:#fff; --fg:#16202a; --mut:#63748a; --line:#dfe4ea; --card:#fff;
-        --accent:#2471a3; --shadow:0 1px 3px rgba(16,32,48,.09); }}
+:root {{ --bg:#fff; --fg:#16202a; --mut:#63748a; --line:#dfe4ea; --card:#fbfcfd;
+        --accent:#2471a3; }}
 @media (prefers-color-scheme: dark) {{
   :root {{ --bg:#14181d; --fg:#e6eaee; --mut:#93a1b0; --line:#2a3138; --card:#1b2027;
-          --accent:#5fa8dd; --shadow:0 1px 3px rgba(0,0,0,.4); }} }}
+          --accent:#5fa8dd; }} }}
 * {{ box-sizing:border-box; }}
-body {{ margin:0; padding:2.5rem 1.5rem 4rem; background:var(--bg); color:var(--fg);
-       font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }}
-main {{ max-width:56rem; margin:0 auto; }}
-h1 {{ font-size:1.7rem; margin:0 0 .3rem; letter-spacing:-.01em; }}
-.sub {{ color:var(--mut); margin:0 0 2rem; }}
-.wrap {{ border:1px solid var(--line); border-radius:.7rem; background:var(--card);
-        box-shadow:var(--shadow); overflow-x:auto; }}
-table {{ border-collapse:collapse; width:100%; min-width:38rem; }}
-th, td {{ text-align:left; padding:.8rem 1rem; border-bottom:1px solid var(--line);
-         vertical-align:top; }}
-th {{ font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; color:var(--mut);
-     font-weight:600; }}
-tr:last-child td {{ border-bottom:none; }}
-td a {{ color:var(--accent); font-weight:600; font-size:1.05rem; text-decoration:none; }}
-td a:hover {{ text-decoration:underline; }}
-.num {{ text-align:right; font-variant-numeric:tabular-nums; }}
-.f1 {{ font-size:.85rem; color:var(--mut); }}
-.mut {{ color:var(--mut); font-size:.83rem; margin-top:.15rem; }}
-.badge {{ display:inline-block; font-size:.68rem; font-weight:600; letter-spacing:.03em;
-         text-transform:uppercase; padding:.15rem .45rem; border-radius:.3rem;
-         background:var(--accent); color:#fff; vertical-align:.15em; }}
-.note {{ color:var(--mut); font-size:.87rem; margin-top:1.5rem; }}
+html, body {{ height:100%; }}
+body {{ margin:0; display:flex; flex-direction:column; background:var(--bg); color:var(--fg);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }}
+header {{ flex:none; border-bottom:1px solid var(--line); background:var(--card);
+         padding:.7rem 1.1rem; display:flex; align-items:center; gap:1rem;
+         flex-wrap:wrap; }}
+.title {{ font-weight:600; font-size:.95rem; margin-right:auto; }}
+.title span {{ display:block; font-weight:400; font-size:.78rem; color:var(--mut); }}
+.pick {{ display:flex; align-items:center; gap:.45rem; font-size:.85rem; color:var(--mut); }}
+select {{ font:inherit; font-size:.88rem; color:var(--fg); background:var(--bg);
+         border:1px solid var(--line); border-radius:.4rem; padding:.32rem 1.9rem .32rem .55rem;
+         appearance:none; cursor:pointer;
+         background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' \
+width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' \
+stroke='%2363748a' stroke-width='1.6' stroke-linecap='round'/></svg>");
+         background-repeat:no-repeat; background-position:right .6rem center; }}
+select:focus-visible {{ outline:2px solid var(--accent); outline-offset:1px; }}
+.meta {{ font-size:.8rem; color:var(--mut); font-variant-numeric:tabular-nums; }}
+.meta b {{ color:var(--fg); font-weight:600; }}
+a.open {{ font-size:.8rem; color:var(--accent); text-decoration:none; white-space:nowrap; }}
+a.open:hover {{ text-decoration:underline; }}
+iframe {{ flex:1 1 auto; width:100%; border:0; min-height:0; }}
+@media (max-width:34rem) {{ .meta {{ width:100%; order:9; }} }}
 </style>
 </head>
 <body>
-<main>
-<h1>Phân tích cảm xúc bình luận thương mại điện tử</h1>
-<p class="sub">Các phiên bản báo cáo. Mỗi phiên bản là một lần huấn luyện,
-số liệu và hình đóng băng tại thời điểm đó.</p>
+<header>
+  <div class="title">Phân tích cảm xúc bình luận thương mại điện tử
+    <span id="nhan"></span></div>
+  <label class="pick">Phiên bản
+    <select id="chon"></select>
+  </label>
+  <div class="meta" id="so"></div>
+  <a class="open" id="rieng" href="#" target="_blank" rel="noopener">Mở riêng ↗</a>
+</header>
+<iframe id="khung" title="Báo cáo"></iframe>
 
-<div class="wrap">
-<table>
-  <thead><tr>
-    <th>Phiên bản</th><th>Ngày train</th><th class="num">Mẫu huấn luyện</th>
-    <th class="num">Dòng thô</th><th>macro-F1</th>
-  </tr></thead>
-  <tbody>
-{chr(10).join(hang)}
-  </tbody>
-</table>
-</div>
+<script>
+const BAN = {data};
+const chon = document.getElementById('chon');
+const khung = document.getElementById('khung');
 
-<p class="note">Link phiên bản (ví dụ <code>/{moi_nhat}/</code>) không thay đổi khi có
-phiên bản mới &mdash; dùng nó khi cần trích dẫn số liệu cố định.</p>
-</main>
+BAN.forEach((v, i) => chon.add(new Option(
+  v.id + ' — ' + v.ngay + (i === 0 ? ' (mới nhất)' : ''), v.id)));
+
+function mo(id, ghiLichSu) {{
+  const v = BAN.find(x => x.id === id) || BAN[0];
+  chon.value = v.id;
+  khung.src = v.id + '/';
+  document.getElementById('rieng').href = v.id + '/';
+  document.getElementById('nhan').textContent = v.label;
+  document.getElementById('so').innerHTML =
+    '<b>' + v.final_rows + '</b> mẫu · ' + v.f1;
+  document.title = 'Báo cáo ' + v.id + ' – Phân tích cảm xúc bình luận';
+  // replaceState: đổi phiên bản không nên chèn thêm một bước vào nút Back.
+  if (ghiLichSu) history.replaceState(null, '', v.id === BAN[0].id ? './' : '?v=' + v.id);
+}}
+
+chon.addEventListener('change', () => mo(chon.value, true));
+// Mặc định bản mới nhất; ?v=v1 để chia sẻ link mở thẳng một phiên bản cũ.
+mo(new URLSearchParams(location.search).get('v') || BAN[0].id, false);
+</script>
 </body>
 </html>
 """)
