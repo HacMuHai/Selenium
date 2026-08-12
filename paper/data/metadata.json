@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "trained_at": "2026-08-12T09:39:21",
+  "trained_at": "2026-08-12T11:45:47",
   "seed": 42,
   "test_size": 0.2,
   "preprocessing_version": "1.0",
@@ -38,9 +38,167 @@
     "accuracy": 0.48514851485148514,
     "macro_f1": 0.21777777777777776
   },
+  "binary": {
+    "total_rows": 3660,
+    "split": {
+      "train": 2928,
+      "test": 732
+    },
+    "models": {
+      "nb": {
+        "n": 732,
+        "accuracy": 0.8961748633879781,
+        "macro_f1": 0.8961120448179272,
+        "per_class": {
+          "negative": {
+            "precision": 0.9413407821229051,
+            "recall": 0.8596938775510204,
+            "f1": 0.8986666666666666,
+            "support": 392
+          },
+          "positive": {
+            "precision": 0.8529411764705882,
+            "recall": 0.9382352941176471,
+            "f1": 0.8935574229691877,
+            "support": 340
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 337,
+            "neutral": 0,
+            "positive": 55
+          },
+          "neutral": {
+            "negative": 0,
+            "neutral": 0,
+            "positive": 0
+          },
+          "positive": {
+            "negative": 21,
+            "neutral": 0,
+            "positive": 319
+          }
+        }
+      },
+      "svm": {
+        "n": 732,
+        "accuracy": 0.9153005464480874,
+        "macro_f1": 0.9149035108114392,
+        "per_class": {
+          "negative": {
+            "precision": 0.9230769230769231,
+            "recall": 0.9183673469387755,
+            "f1": 0.9207161125319694,
+            "support": 392
+          },
+          "positive": {
+            "precision": 0.9064327485380117,
+            "recall": 0.9117647058823529,
+            "f1": 0.9090909090909091,
+            "support": 340
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 360,
+            "neutral": 0,
+            "positive": 32
+          },
+          "neutral": {
+            "negative": 0,
+            "neutral": 0,
+            "positive": 0
+          },
+          "positive": {
+            "negative": 30,
+            "neutral": 0,
+            "positive": 310
+          }
+        }
+      },
+      "lstm": {
+        "n": 732,
+        "accuracy": 0.8592896174863388,
+        "macro_f1": 0.8592830520400374,
+        "per_class": {
+          "negative": {
+            "precision": 0.9313432835820895,
+            "recall": 0.7959183673469388,
+            "f1": 0.858321870701513,
+            "support": 392
+          },
+          "positive": {
+            "precision": 0.7984886649874056,
+            "recall": 0.9323529411764706,
+            "f1": 0.8602442333785617,
+            "support": 340
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 312,
+            "neutral": 0,
+            "positive": 80
+          },
+          "neutral": {
+            "negative": 0,
+            "neutral": 0,
+            "positive": 0
+          },
+          "positive": {
+            "negative": 23,
+            "neutral": 0,
+            "positive": 317
+          }
+        }
+      },
+      "lstm_w2v": {
+        "n": 732,
+        "accuracy": 0.8825136612021858,
+        "macro_f1": 0.8821617898110157,
+        "per_class": {
+          "negative": {
+            "precision": 0.9026315789473685,
+            "recall": 0.875,
+            "f1": 0.88860103626943,
+            "support": 392
+          },
+          "positive": {
+            "precision": 0.8607954545454546,
+            "recall": 0.8911764705882353,
+            "f1": 0.8757225433526012,
+            "support": 340
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 343,
+            "neutral": 0,
+            "positive": 49
+          },
+          "neutral": {
+            "negative": 0,
+            "neutral": 0,
+            "positive": 0
+          },
+          "positive": {
+            "negative": 37,
+            "neutral": 0,
+            "positive": 303
+          }
+        }
+      }
+    },
+    "baseline": {
+      "label": "negative",
+      "accuracy": 0.5355191256830601,
+      "macro_f1": 0.232502965599051
+    }
+  },
   "models": {
     "nb": {
-      "train_seconds": 0.04618033301085234,
+      "train_seconds": 0.05213704099878669,
       "metrics": {
         "n": 808,
         "accuracy": 0.8267326732673267,
@@ -82,7 +240,7 @@
             "positive": 312
           }
         },
-        "predict_seconds": 0.014606166980229318,
+        "predict_seconds": 0.01697125000646338,
         "errors_sample": [
           {
             "text": "Đã trải nghiệm đc mấy tuần, cũng không quá suất sắc như báo chí hay mấy ông review ca tụng, tầm giá này thì con nào cũng ngon tương đương nhau",
@@ -138,7 +296,7 @@
       }
     },
     "svm": {
-      "train_seconds": 5.1842144160182215,
+      "train_seconds": 4.806904333003331,
       "metrics": {
         "n": 808,
         "accuracy": 0.870049504950495,
@@ -180,7 +338,7 @@
             "positive": 305
           }
         },
-        "predict_seconds": 0.18241895799292251,
+        "predict_seconds": 0.20624704199144617,
         "errors_sample": [
           {
             "text": "Khi không có cap kết nối với PC thì nhấn nút joystick không hiển thị gì.cắm cap vga không tự nhận cổng kết nối.",
@@ -236,7 +394,7 @@
       }
     },
     "lstm": {
-      "train_seconds": 10.918285167019349,
+      "train_seconds": 10.746719624963589,
       "metrics": {
         "n": 808,
         "accuracy": 0.8168316831683168,
@@ -278,7 +436,7 @@
             "positive": 287
           }
         },
-        "predict_seconds": 0.3306323749711737,
+        "predict_seconds": 0.3670982079929672,
         "errors_sample": [
           {
             "text": "Đã trải nghiệm đc mấy tuần, cũng không quá suất sắc như báo chí hay mấy ông review ca tụng, tầm giá này thì con nào cũng ngon tương đương nhau",
@@ -329,6 +487,104 @@
             "text": "Loa khá to, hợp người lớn tuổi. Khuyết điểm là do loa sau nên dù chế độ cầm tay thì người ngồi gần đó vẫn nghe được",
             "true": "positive",
             "pred": "negative"
+          }
+        ]
+      }
+    },
+    "lstm_w2v": {
+      "train_seconds": 7.618973958014976,
+      "metrics": {
+        "n": 808,
+        "accuracy": 0.8415841584158416,
+        "macro_f1": 0.8063885664945362,
+        "per_class": {
+          "negative": {
+            "precision": 0.886685552407932,
+            "recall": 0.798469387755102,
+            "f1": 0.8402684563758389,
+            "support": 392
+          },
+          "neutral": {
+            "precision": 0.625,
+            "recall": 0.8,
+            "f1": 0.7017543859649122,
+            "support": 75
+          },
+          "positive": {
+            "precision": 0.8551532033426184,
+            "recall": 0.9002932551319648,
+            "f1": 0.8771428571428571,
+            "support": 341
+          }
+        },
+        "confusion": {
+          "negative": {
+            "negative": 313,
+            "neutral": 29,
+            "positive": 50
+          },
+          "neutral": {
+            "negative": 13,
+            "neutral": 60,
+            "positive": 2
+          },
+          "positive": {
+            "negative": 27,
+            "neutral": 7,
+            "positive": 307
+          }
+        },
+        "predict_seconds": 0.35930266603827477,
+        "errors_sample": [
+          {
+            "text": "Dùng được 7 tháng pin còn 87% Dùng bt, ko vừa sạc vừa dùng nhaVậy có ổn ko m.nTrước dùng 8 plus tận 3 năm pin còn trên 90%",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Đã trải nghiệm đc mấy tuần, cũng không quá suất sắc như báo chí hay mấy ông review ca tụng, tầm giá này thì con nào cũng ngon tương đương nhau",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Máy mới mua có 5ngay chỉ coi phim này 1h mà nay mở máy đèn thì sáng mà màn hình kh lên",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Sản phẩm phù hợp với giá tiền.Vừa chơi vừa làm việc,Nếu chơi game AAA hạng nặng của năm 2024 vẫn dư sứcMSI dùng để chơi game máy sẽ nóng lên nhiều là chuyện đương nhiên.Nên mua thêm đế Fan tản nhiệt v",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Mua hồi 26/1/2025 Jack 3.5 ko sử dụng được nhờ hỗ trợ ạ",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Mình xin nhận xét về sp f209 này như sau.về phần loa thoại có vẽ như không được trong cho lắm.nói chuyện phải hét thật to lên, thì mới thông tín hiệu cho cả 2 bên cùng nghe, về phần tin nhắn,thì khi t",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Loa nghe phòng kín nhỏ thì oke.",
+            "true": "positive",
+            "pred": "neutral"
+          },
+          {
+            "text": "Bật thông báo cuộc gọi zalo, Messenger kiểu gì mh k có sd đk ạ",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Co 30w ma gioi thieu la 120w .tgdd coi lai nhe",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Dùng tốt nhưng dễ vỡ kính mặt lưng",
+            "true": "negative",
+            "pred": "positive"
           }
         ]
       }

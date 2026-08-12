@@ -1,0 +1,6 @@
+﻿Thuật toán,Accuracy,macro-F1
+SVM,"91,5%","91,5%"
+Naive Bayes,"89,6%","89,6%"
+LSTM + PhoW2V,"88,3%","88,2%"
+LSTM,"85,9%","85,9%"
+"Baseline (luôn đoán ""Tiêu cực"")","53,6%","23,3%"

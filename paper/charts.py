@@ -13,7 +13,9 @@ from paper import style
 from paper.analysis.metrics import LABELS
 
 # Thứ tự cố định để mọi hình xếp model giống nhau; người đọc không phải học lại từng hình.
-MODEL_ORDER = ("nb", "svm", "lstm")
+# Thứ tự cố định để mọi hình xếp cột giống nhau. lstm_w2v đứng ngay sau lstm
+# để hai biến thể LSTM nằm cạnh nhau - đó là phép so sánh chính của bài.
+MODEL_ORDER = ("nb", "svm", "lstm", "lstm_w2v")
 
 # Thư mục con trong `out/`.
 DIR_BIEU_DO = "bieu-do"

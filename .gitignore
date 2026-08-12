@@ -102,3 +102,6 @@ htmlcov/
 
 # FastAPI
 .pytest_cache/
+
+# Vector tiền huấn luyện PhoW2V (file gốc 1,18 GB, bản cắt 1,9 MB)
+vectors/

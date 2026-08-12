@@ -44,9 +44,13 @@ LABEL_TAG = {
     "positive": "TichCuc",
 }
 
-MODEL_VI = {"nb": "Naive Bayes", "svm": "SVM", "lstm": "LSTM"}
+MODEL_VI = {"nb": "Naive Bayes", "svm": "SVM", "lstm": "LSTM",
+            "lstm_w2v": "LSTM + PhoW2V"}
 # Màu theo model - khác hẳn bảng màu lớp, để không ai nhầm hai chiều thông tin này.
-MODEL_COLORS = {"nb": "#2980b9", "svm": "#8e44ad", "lstm": "#d68910"}
+# lstm_w2v cùng tông cam với lstm, đậm hơn: hai biến thể của một mô hình,
+# người đọc nhìn màu là thấy chúng cùng họ chứ không phải mô hình thứ tư rời rạc.
+MODEL_COLORS = {"nb": "#2980b9", "svm": "#8e44ad", "lstm": "#d68910",
+                "lstm_w2v": "#a04000"}
 BASELINE_COLOR = "#c0392b"
 
 GRID = "#d5d8dc"

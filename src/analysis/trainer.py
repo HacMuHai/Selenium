@@ -107,6 +107,7 @@ class Trainer:
         evaluations: dict[str, dict],
         baseline: dict,
         test_size: float,
+        binary: Optional[dict] = None,
     ) -> Path:
         try:
             import sklearn
@@ -125,6 +126,9 @@ class Trainer:
             "dataset": stats.as_dict(),
             "split": split_info,
             "baseline": baseline,
+            # Kết quả 2 lớp (bỏ neutral) - để so được với các bài chỉ phân cực/tiêu cực.
+            # Không thay bảng chính, chỉ là bảng phụ giải thích vì sao bảng chính thấp hơn.
+            "binary": binary,
             "models": {
                 name: {
                     "train_seconds": results[name].train_seconds if name in results else None,
