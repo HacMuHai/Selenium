@@ -36,13 +36,15 @@ pages)
 
   [ -n "$VERSION" ] || { echo "[LỖI] Thiếu mã phiên bản. Ví dụ: $0 pages v3 \"Thêm dữ liệu máy in\"" >&2; exit 1; }
   case "$VERSION" in v[0-9]*) ;; *) echo "[LỖI] Mã phiên bản phải dạng v1, v2, ... (nhận: $VERSION)" >&2; exit 1;; esac
+  # Thư mục thật là "v3-12082026" - publish.py gắn ngày train vào và báo lại mã đầy đủ.
+  IDFILE=$(mktemp)
 
   PY=venv/bin/python; [ -x "$PY" ] || PY=python3
 
   # Clone nhánh gh-pages hiện có rồi CỘNG THÊM thư mục vN/, không đè cả nhánh.
   # Chưa có nhánh (lần deploy đầu) thì tạo mới.
   TMP=$(mktemp -d)
-  trap 'rm -rf "$TMP"' EXIT
+  trap 'rm -rf "$TMP" "$IDFILE"' EXIT
   if ! git clone -q --branch gh-pages --single-branch "https://github.com/$REPO.git" "$TMP" 2>/dev/null; then
     echo "  Chưa có nhánh gh-pages, tạo mới."
     git -C "$TMP" init -q
@@ -50,12 +52,14 @@ pages)
   fi
   touch "$TMP/.nojekyll"   # Jekyll bỏ qua file/thư mục bắt đầu bằng "_"; tắt hẳn cho chắc
 
-  "$PY" -m paper.publish --site "$TMP" --out "$OUT" --version "$VERSION" --label "$LABEL"
+  "$PY" -m paper.publish --site "$TMP" --out "$OUT" --version "$VERSION" --label "$LABEL" \
+    --id-file "$IDFILE"
+  VID=$(cat "$IDFILE")
 
   git -C "$TMP" add -A
   git -C "$TMP" -c user.email="$(git config user.email)" \
       -c user.name="$(git config user.name)" \
-      commit -qm "Báo cáo $VERSION${LABEL:+ - $LABEL}"
+      commit -qm "Báo cáo $VID${LABEL:+ - $LABEL}"
   git -C "$TMP" push -q "https://github.com/$REPO.git" gh-pages
 
   # Bật Pages nếu chưa bật (lần sau gọi lại sẽ báo đã tồn tại - bỏ qua).
@@ -67,7 +71,7 @@ pages)
   # `tr` chứ không phải ${VAR,,}: bash mặc định của macOS là 3.2, không có cú pháp đó.
   BASE="https://$(printf %s "$OWNER" | tr '[:upper:]' '[:lower:]').github.io/$NAME"
   echo "  Trang chọn phiên bản: $BASE/"
-  echo "  Phiên bản vừa đẩy:    $BASE/$VERSION/"
+  echo "  Phiên bản vừa đẩy:    $BASE/$VID/"
   echo "  Lần đầu GitHub cần 1-2 phút build. Kiểm tra: gh browse --settings"
   echo
   ;;

@@ -10,6 +10,7 @@ Không gọi trực tiếp; `deploy.sh pages` gọi hộ.
 """
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -42,6 +43,19 @@ def nap_versions(site: Path) -> list[dict]:
 def so(n: int) -> str:
     """4725 -> '4.725'. Dấu chấm ngăn hàng nghìn theo cách viết tiếng Việt."""
     return f"{n:,}".replace(",", ".")
+
+
+def ma_phien_ban(version: str, trained_at: str) -> str:
+    """'v3' + '2026-08-12T...' -> 'v3-12082026'.
+
+    Ngày lấy từ metadata lúc train, không phải ngày deploy: deploy lại một bản cũ
+    tháng sau vẫn phải ra đúng mã cũ, nếu không sẽ mọc thêm thư mục trùng nội dung.
+    Truyền sẵn mã đầy đủ thì giữ nguyên, để deploy đè đúng một phiên bản.
+    """
+    if re.fullmatch(r"v\d+-\d{8}", version):
+        return version
+    nam, thang, ngay = trained_at[:4], trained_at[5:7], trained_at[8:10]
+    return f"{version}-{ngay}{thang}{nam}"
 
 
 def sinh_index(site: Path, versions: list[dict]) -> None:
@@ -149,21 +163,26 @@ def main() -> None:
     p.add_argument("--site", required=True, help="Thư mục bản sao nhánh gh-pages")
     p.add_argument("--out", default="paper/out", help="Thư mục hình vừa build")
     p.add_argument("--metadata", default="paper/data/metadata.json")
-    p.add_argument("--version", required=True, help="Mã phiên bản, ví dụ v3")
+    p.add_argument("--version", required=True, help="Mã phiên bản, ví dụ v3 (ngày tự thêm)")
     p.add_argument("--label", default="", help="Mô tả ngắn phiên bản")
+    p.add_argument("--id-file", help="Ghi mã phiên bản đầy đủ ra file, cho deploy.sh đọc")
     a = p.parse_args()
 
     site, out = Path(a.site), Path(a.out)
-    dich = site / a.version
+    ban = doc_metadata(Path(a.metadata))
+    ma = ma_phien_ban(a.version, ban["trained_at"])
+
+    dich = site / ma
     if dich.exists():
         shutil.rmtree(dich)          # deploy lại cùng mã version = ghi đè có chủ ý
     shutil.copytree(out, dich)
 
-    ban = doc_metadata(Path(a.metadata))
-    ban["id"] = a.version
+    ban["id"] = ma
     ban["label"] = a.label
+    if a.id_file:
+        Path(a.id_file).write_text(ma)
 
-    versions = [v for v in nap_versions(site) if v["id"] != a.version]
+    versions = [v for v in nap_versions(site) if v["id"] != ma]
     versions.insert(0, ban)
     # Mới nhất lên đầu. Sắp theo trained_at chứ không theo thứ tự thêm vào, để
     # deploy bù một bản cũ không đẩy nó lên đầu bảng.
@@ -173,7 +192,7 @@ def main() -> None:
         json.dumps(versions, ensure_ascii=False, indent=2)
     )
     sinh_index(site, versions)
-    print(f"  {a.version}: {ban['final_rows']} mẫu, {len(versions)} phiên bản trên site")
+    print(f"  {ma}: {ban['final_rows']} mẫu, {len(versions)} phiên bản trên site")
 
 
 if __name__ == "__main__":
