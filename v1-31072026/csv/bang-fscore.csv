@@ -1,0 +1,9 @@
+﻿Thuật toán,"F-score
+Tiêu cực","F-score
+Trung lập","F-score
+Tích cực","F-score
+trung bình",Accuracy
+SVM,"89,2%","70,6%","90,2%","83,3%","87,5%"
+Naive Bayes,"87,4%","59,8%","87,3%","78,2%","85,0%"
+LSTM,"81,4%","61,6%","82,3%","75,1%","79,2%"
+"Baseline (luôn đoán ""Tiêu cực"")",–,–,–,"22,9%","52,4%"

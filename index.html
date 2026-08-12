@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phân tích cảm xúc bình luận – báo cáo</title>
+<style>
+:root { --bg:#fff; --fg:#16202a; --mut:#63748a; --line:#dfe4ea; --card:#fbfcfd;
+        --accent:#2471a3; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#14181d; --fg:#e6eaee; --mut:#93a1b0; --line:#2a3138; --card:#1b2027;
+          --accent:#5fa8dd; } }
+* { box-sizing:border-box; }
+html, body { height:100%; }
+body { margin:0; display:flex; flex-direction:column; background:var(--bg); color:var(--fg);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+header { flex:none; border-bottom:1px solid var(--line); background:var(--card);
+         padding:.7rem 1.1rem; display:flex; align-items:center; gap:1rem;
+         flex-wrap:wrap; }
+.title { font-weight:600; font-size:.95rem; margin-right:auto; }
+.title span { display:block; font-weight:400; font-size:.78rem; color:var(--mut); }
+.pick { display:flex; align-items:center; gap:.45rem; font-size:.85rem; color:var(--mut); }
+select { font:inherit; font-size:.88rem; color:var(--fg); background:var(--bg);
+         border:1px solid var(--line); border-radius:.4rem; padding:.32rem 1.9rem .32rem .55rem;
+         appearance:none; cursor:pointer;
+         background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%2363748a' stroke-width='1.6' stroke-linecap='round'/></svg>");
+         background-repeat:no-repeat; background-position:right .6rem center; }
+select:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.meta { font-size:.8rem; color:var(--mut); font-variant-numeric:tabular-nums; }
+.meta b { color:var(--fg); font-weight:600; }
+a.open { font-size:.8rem; color:var(--accent); text-decoration:none; white-space:nowrap; }
+a.open:hover { text-decoration:underline; }
+iframe { flex:1 1 auto; width:100%; border:0; min-height:0; }
+@media (max-width:34rem) { .meta { width:100%; order:9; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">Phân tích cảm xúc bình luận thương mại điện tử
+    <span id="nhan"></span></div>
+  <label class="pick">Phiên bản
+    <select id="chon"></select>
+  </label>
+  <div class="meta" id="so"></div>
+  <a class="open" id="rieng" href="#" target="_blank" rel="noopener">Mở riêng ↗</a>
+</header>
+<iframe id="khung" title="Báo cáo"></iframe>
+
+<script>
+const BAN = [{"id": "v2-12082026", "label": "Thêm 909 comment loa Bluetooth", "ngay": "2026-08-12", "final_rows": "4.037", "total_rows": "4.762", "f1": "SVM 0,831 · LSTM 0,762 · NB 0,719"}, {"id": "v1-31072026", "label": "Điện thoại, laptop, máy in", "ngay": "2026-07-31", "final_rows": "3.128", "total_rows": "3.853", "f1": "SVM 0,833 · NB 0,782 · LSTM 0,751"}];
+const chon = document.getElementById('chon');
+const khung = document.getElementById('khung');
+
+BAN.forEach((v, i) => chon.add(new Option(
+  v.id + ' — ' + v.ngay + (i === 0 ? ' (mới nhất)' : ''), v.id)));
+
+function mo(id, ghiLichSu) {
+  const v = BAN.find(x => x.id === id) || BAN[0];
+  chon.value = v.id;
+  khung.src = v.id + '/';
+  document.getElementById('rieng').href = v.id + '/';
+  document.getElementById('nhan').textContent = v.label;
+  document.getElementById('so').innerHTML =
+    '<b>' + v.final_rows + '</b> mẫu · ' + v.f1;
+  document.title = 'Báo cáo ' + v.id + ' – Phân tích cảm xúc bình luận';
+  // replaceState: đổi phiên bản không nên chèn thêm một bước vào nút Back.
+  if (ghiLichSu) history.replaceState(null, '', v.id === BAN[0].id ? './' : '?v=' + v.id);
+}
+
+chon.addEventListener('change', () => mo(chon.value, true));
+// Mặc định bản mới nhất; ?v=v1 để chia sẻ link mở thẳng một phiên bản cũ.
+mo(new URLSearchParams(location.search).get('v') || BAN[0].id, false);
+</script>
+</body>
+</html>

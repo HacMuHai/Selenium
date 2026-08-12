@@ -1,0 +1,44 @@
+[
+  {
+    "trained_at": "2026-08-12T09:39:21",
+    "total_rows": 4762,
+    "final_rows": 4037,
+    "label_counts": {
+      "negative": 1958,
+      "positive": 1702,
+      "neutral": 377
+    },
+    "split": {
+      "train": 3229,
+      "test": 808
+    },
+    "models": {
+      "svm": 0.831,
+      "lstm": 0.762,
+      "nb": 0.719
+    },
+    "id": "v2-12082026",
+    "label": "Thêm 909 comment loa Bluetooth"
+  },
+  {
+    "trained_at": "2026-07-31T17:31:52",
+    "total_rows": 3853,
+    "final_rows": 3128,
+    "label_counts": {
+      "negative": 1637,
+      "positive": 1169,
+      "neutral": 322
+    },
+    "split": {
+      "train": 2502,
+      "test": 626
+    },
+    "models": {
+      "svm": 0.833,
+      "nb": 0.782,
+      "lstm": 0.751
+    },
+    "id": "v1-31072026",
+    "label": "Điện thoại, laptop, máy in"
+  }
+]
