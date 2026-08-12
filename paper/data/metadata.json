@@ -1,215 +1,225 @@
 {
   "schema": 1,
-  "trained_at": "2026-08-12T08:59:40",
+  "trained_at": "2026-08-12T09:39:21",
   "seed": 42,
   "test_size": 0.2,
   "preprocessing_version": "1.0",
   "sklearn_version": "1.9.0",
   "dataset": {
-    "total_rows": 4725,
+    "total_rows": 4762,
     "dropped_empty": 3,
     "dropped_bad_label": 0,
     "dropped_conflict": 0,
     "dropped_duplicate": 722,
     "skipped_files": [],
-    "final_rows": 4000,
+    "final_rows": 4037,
     "label_counts": {
-      "negative": 1945,
-      "positive": 1679,
-      "neutral": 376
+      "negative": 1958,
+      "positive": 1702,
+      "neutral": 377
     }
   },
   "split": {
-    "train": 3200,
-    "test": 800,
+    "train": 3229,
+    "test": 808,
     "train_labels": {
-      "negative": 1556,
-      "positive": 1343,
-      "neutral": 301
+      "negative": 1566,
+      "positive": 1361,
+      "neutral": 302
     },
     "test_labels": {
-      "negative": 389,
-      "positive": 336,
+      "negative": 392,
+      "positive": 341,
       "neutral": 75
     }
   },
   "baseline": {
     "label": "negative",
-    "accuracy": 0.48625,
-    "macro_f1": 0.21811045696663864
+    "accuracy": 0.48514851485148514,
+    "macro_f1": 0.21777777777777776
   },
   "models": {
     "nb": {
-      "train_seconds": 0.04435262497281656,
+      "train_seconds": 0.04618033301085234,
       "metrics": {
-        "n": 800,
-        "accuracy": 0.8325,
-        "macro_f1": 0.7281982472342557,
+        "n": 808,
+        "accuracy": 0.8267326732673267,
+        "macro_f1": 0.7190975674070743,
         "per_class": {
           "negative": {
-            "precision": 0.836272040302267,
-            "recall": 0.8534704370179949,
-            "f1": 0.8447837150127225,
-            "support": 389
+            "precision": 0.8312342569269522,
+            "recall": 0.8418367346938775,
+            "f1": 0.8365019011406845,
+            "support": 392
           },
           "neutral": {
-            "precision": 0.627906976744186,
-            "recall": 0.36,
-            "f1": 0.4576271186440678,
+            "precision": 0.6046511627906976,
+            "recall": 0.3466666666666667,
+            "f1": 0.4406779661016949,
             "support": 75
           },
           "positive": {
-            "precision": 0.8527777777777777,
-            "recall": 0.9136904761904762,
-            "f1": 0.882183908045977,
-            "support": 336
+            "precision": 0.8478260869565217,
+            "recall": 0.9149560117302052,
+            "f1": 0.8801128349788434,
+            "support": 341
           }
         },
         "confusion": {
           "negative": {
-            "negative": 332,
-            "neutral": 11,
-            "positive": 46
+            "negative": 330,
+            "neutral": 13,
+            "positive": 49
           },
           "neutral": {
-            "negative": 41,
-            "neutral": 27,
+            "negative": 42,
+            "neutral": 26,
             "positive": 7
           },
           "positive": {
-            "negative": 24,
-            "neutral": 5,
-            "positive": 307
+            "negative": 25,
+            "neutral": 4,
+            "positive": 312
           }
         },
-        "predict_seconds": 0.013784749957267195,
+        "predict_seconds": 0.014606166980229318,
         "errors_sample": [
           {
-            "text": "Em mua con này được 4 ngày rồi. Em muốn bán lại máy này thì sao ạ",
+            "text": "Đã trải nghiệm đc mấy tuần, cũng không quá suất sắc như báo chí hay mấy ông review ca tụng, tầm giá này thì con nào cũng ngon tương đương nhau",
             "true": "neutral",
-            "pred": "negative"
+            "pred": "positive"
           },
           {
-            "text": "Nghe cũng được nha nếu xài cục sạc dòng trên 1A không có chuyển điện áp thì xẻ có hiện tượng rè rè mình tes 1 ngày nay rồi mình thì xài thử sạc dự phòng nghe im ru à mấy đèn led đẹp",
-            "true": "neutral",
-            "pred": "negative"
-          },
-          {
-            "text": "Kết nối nhanh. Nhưng nghe các đường tiếng không rõ chỉ chung chung thôi.pin tạm ổn với mức giá",
+            "text": "Sài max ping loa tầm gần 4h ghi chú sài 15 tiếng chắc là nó tính bật nhỏ nhất đấy",
             "true": "negative",
             "pred": "positive"
           },
           {
-            "text": "Điện thoại xiaomiredminote14pro5g em mới mua hồi 7/12/2025 giờ mình muốn bán lại điện máy xanh thì mình lỗ khoản bao nhiêu ạ",
-            "true": "neutral",
-            "pred": "negative"
-          },
-          {
-            "text": "Bên thegioididong có thay pin cho redmi note 14 này không ạ",
-            "true": "neutral",
-            "pred": "negative"
-          },
-          {
-            "text": "Có hỗ trợ bù tiền đổi sang đt khác kh ạ",
-            "true": "neutral",
-            "pred": "negative"
-          },
-          {
-            "text": "mình mới mua. Dùng thấy ok, mình thấy bạn bán cho mình hỗ trợ nhiệt tình. NHƯNG NẾU AI KHÔNG RÀNH VỀ LAPTOP NHƯ MÌNH MỌ NGƯỜI NÊN CÂN NHẮC VỀ VẤN ĐỀ KỸ THUẬT, MÌNH THẤY KỸ THUẬT VỀ LAPTOP CÁC BẠN Ở TG",
+            "text": "Bas mạnh quá, trees thì hơi yếu",
             "true": "negative",
             "pred": "positive"
           },
           {
-            "text": "Pin dùng 4 tháng tụt 1%",
-            "true": "positive",
-            "pred": "negative"
+            "text": "Sản phẩm phù hợp với giá tiền.Vừa chơi vừa làm việc,Nếu chơi game AAA hạng nặng của năm 2024 vẫn dư sứcMSI dùng để chơi game máy sẽ nóng lên nhiều là chuyện đương nhiên.Nên mua thêm đế Fan tản nhiệt v",
+            "true": "negative",
+            "pred": "positive"
           },
           {
-            "text": "Tôi rất thik mua hàng ở điện máy xanh.. loa kéo của tui bị lỗi đổi trả 3 lần mà điện máy xanh cũng đáp ung cko tôi toi rát thjk mua hàng o điện máy xanh.. và tôi sẻ đồng hành với điện máy xanh mãi mãi",
-            "true": "positive",
-            "pred": "negative"
-          },
-          {
-            "text": "Còn bảo hành ra dán lại miếng chống trầy xước màng hình có mất tiền không",
+            "text": "Mua hơn 2 tháng thì có trả điện thoại dc ko",
             "true": "neutral",
             "pred": "negative"
+          },
+          {
+            "text": "Chữ hơi nhỏ, người lớn tuổi xài sẽ khó nhìn chữ",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Bật thông báo cuộc gọi zalo, Messenger kiểu gì mh k có sd đk ạ",
+            "true": "neutral",
+            "pred": "negative"
+          },
+          {
+            "text": "Lo bị lổi chép ko nghe duoc",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Co 30w ma gioi thieu la 120w .tgdd coi lai nhe",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Dùng tốt nhưng dễ vỡ kính mặt lưng",
+            "true": "negative",
+            "pred": "positive"
           }
         ]
       }
     },
     "svm": {
-      "train_seconds": 4.432377416000236,
+      "train_seconds": 5.1842144160182215,
       "metrics": {
-        "n": 800,
-        "accuracy": 0.87375,
-        "macro_f1": 0.836008811008811,
+        "n": 808,
+        "accuracy": 0.870049504950495,
+        "macro_f1": 0.8307913599488529,
         "per_class": {
           "negative": {
-            "precision": 0.8772378516624041,
-            "recall": 0.8817480719794345,
-            "f1": 0.8794871794871795,
-            "support": 389
+            "precision": 0.8788659793814433,
+            "recall": 0.8698979591836735,
+            "f1": 0.8743589743589745,
+            "support": 392
           },
           "neutral": {
-            "precision": 0.7397260273972602,
-            "recall": 0.72,
-            "f1": 0.7297297297297296,
+            "precision": 0.6785714285714286,
+            "recall": 0.76,
+            "f1": 0.7169811320754718,
             "support": 75
           },
           "positive": {
-            "precision": 0.8988095238095238,
-            "recall": 0.8988095238095238,
-            "f1": 0.8988095238095238,
-            "support": 336
+            "precision": 0.9077380952380952,
+            "recall": 0.8944281524926686,
+            "f1": 0.9010339734121122,
+            "support": 341
           }
         },
         "confusion": {
           "negative": {
-            "negative": 343,
-            "neutral": 15,
-            "positive": 31
+            "negative": 341,
+            "neutral": 23,
+            "positive": 28
           },
           "neutral": {
-            "negative": 18,
-            "neutral": 54,
+            "negative": 15,
+            "neutral": 57,
             "positive": 3
           },
           "positive": {
-            "negative": 30,
+            "negative": 32,
             "neutral": 4,
-            "positive": 302
+            "positive": 305
           }
         },
-        "predict_seconds": 0.1824969999724999,
+        "predict_seconds": 0.18241895799292251,
         "errors_sample": [
           {
-            "text": "Cho mình hỏi tíMình có mua máy nàyGiờ muốn đổi sang máy khác đc ko.Máy này chữ nhỏ quá bà nhà mình ko dùng đc",
+            "text": "Khi không có cap kết nối với PC thì nhấn nút joystick không hiển thị gì.cắm cap vga không tự nhận cổng kết nối.",
             "true": "negative",
             "pred": "neutral"
           },
           {
-            "text": "Nghe cũng được nha nếu xài cục sạc dòng trên 1A không có chuyển điện áp thì xẻ có hiện tượng rè rè mình tes 1 ngày nay rồi mình thì xài thử sạc dự phòng nghe im ru à mấy đèn led đẹp",
+            "text": "Dùng được 7 tháng pin còn 87% Dùng bt, ko vừa sạc vừa dùng nhaVậy có ổn ko m.nTrước dùng 8 plus tận 3 năm pin còn trên 90%",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Đã trải nghiệm đc mấy tuần, cũng không quá suất sắc như báo chí hay mấy ông review ca tụng, tầm giá này thì con nào cũng ngon tương đương nhau",
+            "true": "neutral",
+            "pred": "positive"
+          },
+          {
+            "text": "Sản phẩm phù hợp với giá tiền.Vừa chơi vừa làm việc,Nếu chơi game AAA hạng nặng của năm 2024 vẫn dư sứcMSI dùng để chơi game máy sẽ nóng lên nhiều là chuyện đương nhiên.Nên mua thêm đế Fan tản nhiệt v",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Mua hơn 2 tháng thì có trả điện thoại dc ko",
             "true": "neutral",
             "pred": "negative"
           },
           {
-            "text": "Kết nối nhanh. Nhưng nghe các đường tiếng không rõ chỉ chung chung thôi.pin tạm ổn với mức giá",
+            "text": "Mua hồi 26/1/2025 Jack 3.5 ko sử dụng được nhờ hỗ trợ ạ",
             "true": "negative",
-            "pred": "positive"
+            "pred": "neutral"
           },
           {
-            "text": "mình mới mua. Dùng thấy ok, mình thấy bạn bán cho mình hỗ trợ nhiệt tình. NHƯNG NẾU AI KHÔNG RÀNH VỀ LAPTOP NHƯ MÌNH MỌ NGƯỜI NÊN CÂN NHẮC VỀ VẤN ĐỀ KỸ THUẬT, MÌNH THẤY KỸ THUẬT VỀ LAPTOP CÁC BẠN Ở TG",
-            "true": "negative",
-            "pred": "positive"
-          },
-          {
-            "text": "Pin dùng 4 tháng tụt 1%",
+            "text": "Hiện tại tôi sử dụng rất tốt, tiện lợi khi sử dụng wifi. Nhưng không biết khi chuyển sang wifi khác và thay mực có dễ không vậy shop",
             "true": "positive",
             "pred": "negative"
           },
           {
-            "text": "Tôi rất thik mua hàng ở điện máy xanh.. loa kéo của tui bị lỗi đổi trả 3 lần mà điện máy xanh cũng đáp ung cko tôi toi rát thjk mua hàng o điện máy xanh.. và tôi sẻ đồng hành với điện máy xanh mãi mãi",
-            "true": "positive",
+            "text": "Bật thông báo cuộc gọi zalo, Messenger kiểu gì mh k có sd đk ạ",
+            "true": "neutral",
             "pred": "negative"
           },
           {
@@ -218,115 +228,105 @@
             "pred": "negative"
           },
           {
-            "text": "đúng hẹn",
-            "true": "positive",
-            "pred": "negative"
-          },
-          {
-            "text": "Mua tặng người thân nên cũng k có ý kiến. Hi vọng máy xài bền",
-            "true": "neutral",
-            "pred": "negative"
-          },
-          {
-            "text": "Pass lại màu đen do đeo ko hợp. Dùng được 3 ngày. 1triệu. xxxx268475. Free ship toàn quốc. COD",
-            "true": "neutral",
-            "pred": "negative"
+            "text": "Dùng tốt nhưng dễ vỡ kính mặt lưng",
+            "true": "negative",
+            "pred": "positive"
           }
         ]
       }
     },
     "lstm": {
-      "train_seconds": 9.641102458001114,
+      "train_seconds": 10.918285167019349,
       "metrics": {
-        "n": 800,
-        "accuracy": 0.83375,
-        "macro_f1": 0.7902922540859322,
+        "n": 808,
+        "accuracy": 0.8168316831683168,
+        "macro_f1": 0.7623893866329606,
         "per_class": {
           "negative": {
-            "precision": 0.8620689655172413,
-            "recall": 0.8354755784061697,
-            "f1": 0.8485639686684073,
-            "support": 389
+            "precision": 0.875,
+            "recall": 0.8035714285714286,
+            "f1": 0.8377659574468085,
+            "support": 392
           },
           "neutral": {
-            "precision": 0.5742574257425742,
+            "precision": 0.47540983606557374,
             "recall": 0.7733333333333333,
-            "f1": 0.6590909090909091,
+            "f1": 0.5888324873096447,
             "support": 75
           },
           "positive": {
-            "precision": 0.8819875776397516,
-            "recall": 0.8452380952380952,
-            "f1": 0.8632218844984803,
-            "support": 336
+            "precision": 0.8803680981595092,
+            "recall": 0.841642228739003,
+            "f1": 0.8605697151424287,
+            "support": 341
           }
         },
         "confusion": {
           "negative": {
-            "negative": 325,
-            "neutral": 29,
-            "positive": 35
+            "negative": 315,
+            "neutral": 43,
+            "positive": 34
           },
           "neutral": {
-            "negative": 14,
+            "negative": 12,
             "neutral": 58,
-            "positive": 3
+            "positive": 5
           },
           "positive": {
-            "negative": 38,
-            "neutral": 14,
-            "positive": 284
+            "negative": 33,
+            "neutral": 21,
+            "positive": 287
           }
         },
-        "predict_seconds": 0.2191322089638561,
+        "predict_seconds": 0.3306323749711737,
         "errors_sample": [
           {
-            "text": "Cho mình hỏi tíMình có mua máy nàyGiờ muốn đổi sang máy khác đc ko.Máy này chữ nhỏ quá bà nhà mình ko dùng đc",
-            "true": "negative",
-            "pred": "neutral"
+            "text": "Đã trải nghiệm đc mấy tuần, cũng không quá suất sắc như báo chí hay mấy ông review ca tụng, tầm giá này thì con nào cũng ngon tương đương nhau",
+            "true": "neutral",
+            "pred": "positive"
           },
           {
-            "text": "loa ok hát hay ko hút micro",
+            "text": "Máy có một sim không thích lắm trước khi mua không để ý cứ nghĩ là 2 sim",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "máy khá ok, chỉ có tiếng quạt hơi ồn xíu, pin sài nghe nhạc khoảng hơn 3 tiếng, bàn phím có độ nảy cao, khá mượt hy vọng sẽ dùng ổn và không bị vấn đề gì.",
             "true": "positive",
             "pred": "negative"
           },
           {
-            "text": "Mở lớn bass hơi rè",
-            "true": "negative",
-            "pred": "positive"
-          },
-          {
-            "text": "Con máy 10tr bạc đánh liên quân tụt FPS liên tục, chưa bao giờ hối hận mua phải cái gì ngoại trừ con đth này. Anh em nào có ý định mua để chơi game thì bỏ đi nha.",
-            "true": "negative",
-            "pred": "positive"
-          },
-          {
-            "text": "Vì sao không mở được Tạp chí màn hình khóa trên Realme 14T 5g này",
+            "text": "Mua hồi 26/1/2025 Jack 3.5 ko sử dụng được nhờ hỗ trợ ạ",
             "true": "negative",
             "pred": "neutral"
           },
           {
-            "text": "Nghe cũng được nha nếu xài cục sạc dòng trên 1A không có chuyển điện áp thì xẻ có hiện tượng rè rè mình tes 1 ngày nay rồi mình thì xài thử sạc dự phòng nghe im ru à mấy đèn led đẹp",
+            "text": "K in đc wifi nhắn hỗ trợ k trả lời",
+            "true": "negative",
+            "pred": "neutral"
+          },
+          {
+            "text": "Mình xin nhận xét về sp f209 này như sau.về phần loa thoại có vẽ như không được trong cho lắm.nói chuyện phải hét thật to lên, thì mới thông tín hiệu cho cả 2 bên cùng nghe, về phần tin nhắn,thì khi t",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Loa nghe phòng kín nhỏ thì oke.",
+            "true": "positive",
+            "pred": "neutral"
+          },
+          {
+            "text": "Thấy trên thông tin giới thiệu ghi máy in được 20.000 trang/ tháng nhưng không hiểu sao mua về chưa được 1 tuần in chưa được 500 trang máy báo hết mực. Tốc độ giấy in ra có lúc không đều có khi phải c",
+            "true": "negative",
+            "pred": "positive"
+          },
+          {
+            "text": "Bật thông báo cuộc gọi zalo, Messenger kiểu gì mh k có sd đk ạ",
             "true": "neutral",
             "pred": "negative"
           },
           {
-            "text": "Kết nối nhanh. Nhưng nghe các đường tiếng không rõ chỉ chung chung thôi.pin tạm ổn với mức giá",
-            "true": "negative",
-            "pred": "positive"
-          },
-          {
-            "text": "Hiện tại máy sử dụng im, in tốt",
-            "true": "positive",
-            "pred": "negative"
-          },
-          {
-            "text": "Hàng chính hãng mic bắt nhẹ âm thanh chuẩn nhược điểm là mỗi lần tắt di bật lại không tự động kết nối với thiết bị đã kết nối ma phải thao tác lại từ đầu",
-            "true": "negative",
-            "pred": "positive"
-          },
-          {
-            "text": "Pin dùng 4 tháng tụt 1%",
+            "text": "Loa khá to, hợp người lớn tuổi. Khuyết điểm là do loa sau nên dù chế độ cầm tay thì người ngồi gần đó vẫn nghe được",
             "true": "positive",
             "pred": "negative"
           }
