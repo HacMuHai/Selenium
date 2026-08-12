@@ -142,7 +142,7 @@ Selenium cần Chrome browser để chạy:
 
 2. **Chạy export:**
    ```bash
-   python -m src.main --export-only --export excel_comment
+   python -m src.main --export-only --export data
    ```
    - Chỉ đọc MongoDB và ghi Excel, không mở Chrome
    - File Excel lưu trong thư mục truyền vào `--export` (mặc định `EXPORT_DIR` trong `.env`)
@@ -225,7 +225,7 @@ python -m pip install -r requirements.txt
 
 3. **Không commit thư mục `venv/` vào git** (đã có trong .gitignore)
 
-4. **File Excel được tạo tự động** trong các thư mục `excel_comment/`, `excel_comment2/`, `excel_tag/`
+4. **File Excel được tạo tự động** trong thư mục `data/`
 
 5. **MongoDB connection string** đã được cấu hình sẵn trong code, không cần cài MongoDB local
 

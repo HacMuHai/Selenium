@@ -49,7 +49,7 @@ danh sách đầy đủ.
 | `HEADLESS` | `true` | Chrome chạy ẩn |
 | `MAX_WORKERS` | `3` | Số thread crawl song song (mỗi thread 1 Chrome ~200–400MB) |
 | `WAIT_TIMEOUT` | `15` | Timeout WebDriverWait (giây) |
-| `EXPORT_DIR` | `excel_comment` | Thư mục xuất Excel |
+| `EXPORT_DIR` | `data` | Thư mục xuất Excel |
 | `MAX_ROWS_PER_FILE` | `2000` | Số dòng mỗi file `.xlsx` |
 
 ## Chạy crawler
@@ -119,11 +119,11 @@ Entrypoint **riêng**, chạy độc lập với crawler và không cần MongoD
 python -m src.analyze train --models nb,svm,lstm --report report.html
 python -m src.analyze evaluate --report report.html --csv metrics.csv
 python -m src.analyze predict --text "Sản phẩm dùng rất tốt"
-python -m src.analyze predict --input excel_comment --output excel_predicted --model svm
+python -m src.analyze predict --input data --output data_predicted --model svm
 ```
 
-Dữ liệu huấn luyện: `excel_tag_v2/` (3853 dòng đã gán nhãn, xem `plans/*/scout/scout-02-audit-nhan.md`
-để biết vì sao không dùng `excel_tag/` gốc). Artifact lưu ở `models_store/` (đã gitignore).
+Dữ liệu huấn luyện: `data_tagged/` (3853 dòng đã gán nhãn, xem `plans/*/scout/scout-02-audit-nhan.md`
+để biết vì sao không dùng `excel_tag/` gốc — nay ở `outdated/`). Artifact lưu ở `models_store/` (đã gitignore).
 
 **Kết quả trên tập test 626 dòng:**
 

@@ -1,5 +1,5 @@
 """
-Đọc dữ liệu đã gán nhãn từ `excel_tag_v2/`, làm sạch, chia train/test.
+Đọc dữ liệu đã gán nhãn từ `data_tagged/`, làm sạch, chia train/test.
 
 RỦI RO SỐ 1 CỦA MODULE NÀY LÀ RÒ RỈ DỮ LIỆU: cùng một câu comment xuất hiện nhiều lần
 trong dữ liệu. Nếu split trước khi khử trùng, câu đó nằm ở CẢ train lẫn test → điểm số

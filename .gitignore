@@ -57,6 +57,9 @@ geckodriver
 
 # Excel output files (generated data)
 excel_*/
+data/
+data_tagged/
+outdated/
 *.xlsx
 
 # Artifact model da train

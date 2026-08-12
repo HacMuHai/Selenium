@@ -4,7 +4,7 @@ ENTRYPOINT RIÊNG cho phân tích cảm xúc. Chạy từ repo root:
     python -m src.analyze train    [--models nb,svm,lstm]
     python -m src.analyze evaluate [--report report.html] [--csv metrics.csv]
     python -m src.analyze predict   --text "Sản phẩm dùng rất tốt"
-    python -m src.analyze predict   --input excel_comment --output excel_predicted --model svm
+    python -m src.analyze predict   --input data --output data_predicted --model svm
 
 Độc lập hoàn toàn với crawler (`src/main.py`) và với MongoDB - không import, không kết nối.
 """
