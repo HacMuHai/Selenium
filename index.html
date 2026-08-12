@@ -47,7 +47,7 @@ iframe { flex:1 1 auto; width:100%; border:0; min-height:0; }
 <iframe id="khung" title="Báo cáo"></iframe>
 
 <script>
-const BAN = [{"id": "v3-12082026", "label": "Thêm LSTM+PhoW2V và bảng 2 lớp", "ngay": "2026-08-12", "final_rows": "4.037", "total_rows": "4.762", "f1": "SVM 0,831 · LSTM_W2V 0,806 · LSTM 0,762 · NB 0,719"}, {"id": "v2-12082026", "label": "Thêm 909 comment loa Bluetooth", "ngay": "2026-08-12", "final_rows": "4.037", "total_rows": "4.762", "f1": "SVM 0,831 · LSTM 0,762 · NB 0,719"}, {"id": "v1-31072026", "label": "Điện thoại, laptop, máy in", "ngay": "2026-07-31", "final_rows": "3.128", "total_rows": "3.853", "f1": "SVM 0,833 · NB 0,782 · LSTM 0,751"}];
+const BAN = [{"id": "v3-12082026", "label": "Thêm mô hình LSTM+PhoW2V, bảng kết quả 2 lớp để so với các bài cùng chủ đề, sửa lỗi Naive Bayes đoán ra lớp không có dữ liệu", "ngay": "2026-08-12", "final_rows": "4.037", "total_rows": "4.762", "f1": "SVM 0,831 · LSTM+W2V 0,806 · LSTM 0,762 · NB 0,719"}, {"id": "v2-12082026", "label": "Gán nhãn thêm 909 comment loa Bluetooth: 3.128 → 4.037 mẫu, cân bằng lại tỉ trọng danh mục", "ngay": "2026-08-12", "final_rows": "4.037", "total_rows": "4.762", "f1": "SVM 0,831 · LSTM 0,762 · NB 0,719"}, {"id": "v1-31072026", "label": "Bản đầu — 3.128 mẫu điện thoại/laptop/máy in, so sánh Naive Bayes · SVM · LSTM", "ngay": "2026-07-31", "final_rows": "3.128", "total_rows": "3.853", "f1": "SVM 0,833 · NB 0,782 · LSTM 0,751"}];
 const chon = document.getElementById('chon');
 const khung = document.getElementById('khung');
 

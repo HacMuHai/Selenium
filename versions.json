@@ -19,7 +19,7 @@
       "nb": 0.719
     },
     "id": "v3-12082026",
-    "label": "Thêm LSTM+PhoW2V và bảng 2 lớp"
+    "label": "Thêm mô hình LSTM+PhoW2V, bảng kết quả 2 lớp để so với các bài cùng chủ đề, sửa lỗi Naive Bayes đoán ra lớp không có dữ liệu"
   },
   {
     "trained_at": "2026-08-12T09:39:21",
@@ -40,7 +40,7 @@
       "nb": 0.719
     },
     "id": "v2-12082026",
-    "label": "Thêm 909 comment loa Bluetooth"
+    "label": "Gán nhãn thêm 909 comment loa Bluetooth: 3.128 → 4.037 mẫu, cân bằng lại tỉ trọng danh mục"
   },
   {
     "trained_at": "2026-07-31T17:31:52",
@@ -61,6 +61,6 @@
       "lstm": 0.751
     },
     "id": "v1-31072026",
-    "label": "Điện thoại, laptop, máy in"
+    "label": "Bản đầu — 3.128 mẫu điện thoại/laptop/máy in, so sánh Naive Bayes · SVM · LSTM"
   }
 ]
