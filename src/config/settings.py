@@ -34,12 +34,12 @@ class Settings(BaseSettings):
     wait_timeout: float = 15.0
 
     # Export
-    export_dir: str = "excel_comment"
+    export_dir: str = "data"
     max_rows_per_file: int = 2000
 
     # Phân tích cảm xúc
     models_dir: str = "models_store"
-    tag_dir: str = "excel_tag_v2"      # nguồn nhãn ĐÃ LÀM SẠCH, không dùng excel_tag/
+    tag_dir: str = "data_tagged"       # nguồn nhãn ĐÃ LÀM SẠCH (gốc: excel_tag_v2, xem outdated/)
     default_model: str = "svm"
     test_size: float = 0.2
     random_seed: int = 42
