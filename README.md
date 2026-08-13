@@ -116,7 +116,7 @@ Router `/comments` cũ đã bị xoá (trả toàn `null` do đọc sai schema).
 Entrypoint **riêng**, chạy độc lập với crawler và không cần MongoDB:
 
 ```bash
-python -m src.analyze train --models nb,svm,lstm --report report.html
+python -m src.analyze train --report report.html
 python -m src.analyze evaluate --report report.html --csv metrics.csv
 python -m src.analyze predict --text "Sản phẩm dùng rất tốt"
 python -m src.analyze predict --input data --output data_predicted --model svm

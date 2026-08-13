@@ -1,7 +1,7 @@
 """
 ENTRYPOINT RIÊNG cho phân tích cảm xúc. Chạy từ repo root:
 
-    python -m src.analyze train    [--models nb,svm,lstm]
+    python -m src.analyze train    [--models nb,svm,lstm,lstm_w2v]
     python -m src.analyze evaluate [--report report.html] [--csv metrics.csv]
     python -m src.analyze predict   --text "Sản phẩm dùng rất tốt"
     python -m src.analyze predict   --input data --output data_predicted --model svm

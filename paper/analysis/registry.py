@@ -9,7 +9,7 @@ from paper.analysis.models.base import SentimentModel
 
 logger = logging.getLogger(__name__)
 
-_ALL_NAMES = ("nb", "svm", "lstm")
+_ALL_NAMES = ("nb", "svm", "lstm", "lstm_w2v")
 
 
 def _tensorflow_installed() -> bool:
@@ -22,8 +22,8 @@ def available_names() -> list[str]:
     """Tên các model dùng được trong môi trường hiện tại."""
     if _tensorflow_installed():
         return list(_ALL_NAMES)
-    logger.info("Chưa cài TensorFlow - bỏ qua model 'lstm'")
-    return [n for n in _ALL_NAMES if n != "lstm"]
+    logger.info("Chưa cài TensorFlow - bỏ qua model 'lstm' và 'lstm_w2v'")
+    return [n for n in _ALL_NAMES if not n.startswith("lstm")]
 
 
 def get_model_class(name: str) -> Type[SentimentModel]:
@@ -37,9 +37,13 @@ def get_model_class(name: str) -> Type[SentimentModel]:
         from paper.analysis.models.svm import SVMModel
 
         return SVMModel
-    if key == "lstm":
+    if key in ("lstm", "lstm_w2v"):
         if not _tensorflow_installed():
-            raise ValueError("Model 'lstm' cần TensorFlow: pip install tensorflow")
+            raise ValueError(f"Model {key!r} cần TensorFlow: pip install tensorflow")
+        if key == "lstm_w2v":
+            from paper.analysis.models.lstm_w2v import LSTMW2VModel
+
+            return LSTMW2VModel
         from paper.analysis.models.lstm import LSTMModel
 
         return LSTMModel

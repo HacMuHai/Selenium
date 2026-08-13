@@ -357,20 +357,20 @@ def build(metadata: dict, *, tag_dir: Path, skip_sample: bool) -> list[tuple[str
 
     run("Bảng", "Thống kê quá trình làm sạch dữ liệu", bang_lam_sach, metadata)
     run("Bảng", "Phân bố nhãn trên tập huấn luyện và kiểm tra", bang_phan_bo_nhan, metadata)
-    run("Bảng", "Precision và Recall của ba thuật toán", bang_precision_recall, metadata)
-    run("Bảng", "Kết quả F-score của ba thuật toán", bang_fscore, metadata)
+    run("Bảng", "Precision và Recall của các mô hình", bang_precision_recall, metadata)
+    run("Bảng", "Kết quả F-score của các mô hình", bang_fscore, metadata)
     run("Bảng", "Precision / Recall / F1 theo từng lớp", bang_metrics_chi_tiet, metadata)
     run("Bảng", "Một số trường hợp dự đoán sai", bang_vi_du_doan_sai, metadata)
     run("Bảng", "Kết quả trên bài toán 2 lớp (bỏ trung lập)", bang_hai_lop, metadata)
 
     run("Biểu đồ", "Phân bố nhãn sau khi làm sạch", charts.phan_bo_nhan, metadata)
     run("Biểu đồ", "Phân bố nhãn ở tập train và test", charts.phan_bo_train_test, metadata)
-    run("Biểu đồ", "So sánh ba mô hình với baseline", charts.so_sanh_model, metadata)
+    run("Biểu đồ", "So sánh các mô hình với baseline", charts.so_sanh_model, metadata)
     run("Biểu đồ", "Điểm F1 theo từng lớp cảm xúc", charts.f1_tung_lop, metadata)
     for name in charts._models(metadata):
         run("Biểu đồ", f"Ma trận nhầm lẫn – {style.MODEL_VI[name]}",
             charts.confusion, metadata, name)
-    run("Biểu đồ", "Thời gian huấn luyện của ba mô hình", charts.thoi_gian_train, metadata)
+    run("Biểu đồ", "Thời gian huấn luyện của các mô hình", charts.thoi_gian_train, metadata)
     return items
 
 
