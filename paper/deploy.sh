@@ -30,12 +30,8 @@ LABEL="${3:-}"
 chuan_bi_site() {
   [ -n "$VERSION" ] || {
     echo "[LỖI] Thiếu mã phiên bản. Ví dụ: $0 $MODE v3 \"Thêm dữ liệu máy in\"" >&2; exit 1; }
-  # Mô tả là BẮT BUỘC: trang chọn phiên bản chỉ hiện mã và ngày, không có mô tả thì
-  # ba tháng sau không ai nhớ v3 khác v2 chỗ nào.
-  [ -n "$LABEL" ] || {
-    echo "[LỖI] Thiếu mô tả. Ghi rõ phiên bản này nâng cấp gì:" >&2
-    echo "      $0 $MODE $VERSION \"Thêm LSTM+PhoW2V, bảng 2 lớp, sửa lỗi Naive Bayes\"" >&2
-    exit 1; }
+  # Mô tả BẮT BUỘC phải có, nhưng thường là đã ghi trong paper/changelog.py rồi -
+  # publish.py tự lấy ở đó và báo lỗi nếu cả hai đều trống.
   case "$VERSION" in v[0-9]*) ;;
     *) echo "[LỖI] Mã phiên bản phải dạng v1, v2, ... (nhận: $VERSION)" >&2; exit 1;; esac
 
@@ -143,8 +139,9 @@ Cách dùng:
                               Các phiên bản cũ được giữ nguyên; trang gốc liệt kê tất cả.
                               Deploy lại cùng mã vN = ghi đè đúng phiên bản đó.
 
-  Mô tả là BẮT BUỘC ở cả hai lệnh: ghi rõ phiên bản đó nâng cấp những gì
-  ("Thêm LSTM+PhoW2V, bảng 2 lớp, sửa lỗi Naive Bayes"), không phải chỉ đặt tên.
+  Mô tả là BẮT BUỘC nhưng thường KHÔNG cần gõ: khai trong paper/changelog.py
+  (cùng nguồn với khối "Có gì mới" đầu báo cáo) rồi chạy `deploy.sh pages v4`
+  là xong. Truyền chuỗi ở tham số thứ 3 chỉ để ghi đè tạm.
 
   ./paper/deploy.sh tunnel    Mở Cloudflare Tunnel.
                               Link tạm (*.trycloudflare.com), chỉ sống khi cửa sổ này còn chạy.

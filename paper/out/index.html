@@ -16,6 +16,18 @@ body { margin:0; padding:2.5rem 1.5rem 4rem; background:var(--bg); color:var(--f
 main { max-width:62rem; margin:0 auto; }
 h1 { font-size:1.7rem; margin:0 0 .3rem; letter-spacing:-.01em; }
 .sub { color:var(--mut); margin:0 0 1.5rem; }
+.moi { border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:.5rem;
+       background:var(--card); padding:1rem 1.2rem .9rem; margin:1.4rem 0 .8rem; }
+.moi h3 { margin:0 0 .7rem; font-size:1rem; letter-spacing:-.01em; }
+.moi ul, .thuatngu ul { margin:0; padding-left:1.1rem; }
+.moi li { margin-bottom:.65rem; }
+.moi li:last-child { margin-bottom:0; }
+.moi li b { font-size:.95rem; }
+.thuatngu { border:1px solid var(--line); border-radius:.5rem; background:var(--card);
+            padding:.6rem .9rem; margin:0 0 1.6rem; color:var(--mut); font-size:.88rem; }
+.thuatngu summary { cursor:pointer; font-weight:600; color:var(--fg); }
+.thuatngu[open] summary { margin-bottom:.6rem; }
+.thuatngu li { margin-bottom:.5rem; }
 h2 { font-size:1.15rem; margin:3rem 0 1rem; padding-bottom:.4rem;
      border-bottom:1px solid var(--line); }
 .stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1.2rem 0 0; }
@@ -83,14 +95,7 @@ footer { margin-top:3.5rem; color:var(--mut); font-size:.82rem;
 <p class="sub">Phân tích cảm xúc bình luận sản phẩm tiếng Việt · kết quả huấn luyện
 lúc 2026-08-12T11:45:47</p>
 <div class="stats"><div class="stat"><b>4.037</b><span>bình luận sau làm sạch</span></div><div class="stat"><b>3.229 / 808</b><span>train / test</span></div><div class="stat"><b>4</b><span>mô hình so sánh</span></div><div class="stat"><b>0.831</b><span>macro-F1 tốt nhất (SVM)</span></div></div>
-<p class="note">Toàn bộ ảnh là PNG 300&nbsp;dpi, chèn thẳng vào Word được. Mỗi bảng có
-thêm một file <code>.csv</code> cùng tên nếu bạn muốn tự định dạng lại trong Excel.
-Số thứ tự hình ở đây chỉ để tham chiếu nhanh — khi đưa vào bài, đánh số lại theo
-bố cục chương của bạn. <b>Bấm vào ảnh</b> để phóng to, bấm tiếp để xem cỡ thật.</p>
-<p class="note">Hình nào có ảnh mẫu tương ứng thì xếp <b>hai cột</b>: kết quả của bạn
-bên trái, ảnh mẫu từ bài tham khảo bên phải. Ảnh mẫu chỉ để đối chiếu bố cục và
-cách trình bày — <b>số liệu hai bên không so trực tiếp được</b> vì khác tập dữ liệu
-và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
+<section class="moi"><h3>Có gì mới ở phiên bản v3</h3><ul><li><b>Thêm mô hình thứ tư: LSTM + PhoW2V</b><br>LSTM cũ khởi tạo vector từ ngẫu nhiên rồi tự học nghĩa từ 3.229 câu — quá ít. Bản mới nạp sẵn vector đã học từ 20&nbsp;GB văn bản tiếng Việt. Đo trên 5 lần chia dữ liệu: macro-F1 <b>0,772</b> so với <b>0,763</b> của bản cũ. Nhỏ, nhưng riêng lớp <i>trung lập</i> tăng mạnh: <b>58,9% → 70,2%</b>.</li><li><b>Thêm bảng kết quả 2 lớp</b><br>Phần lớn bài báo cùng chủ đề chỉ phân tích cực/tiêu cực, bỏ lớp trung lập, nên con số của họ cao hơn. Bảng mới cho thấy cùng bộ dữ liệu này đặt về 2 lớp thì SVM đạt <b>91,5%</b> — tương đương các bài đã công bố. Bảng chính vẫn là 3 lớp.</li><li><b>Sửa lỗi Naive Bayes đoán ra lớp không có dữ liệu</b><br>Mô hình duyệt danh sách nhãn cố định nên một lớp <b>không có mẫu huấn luyện nào</b> vẫn có thể được đoán ra. Chỉ lộ khi chạy bảng 2 lớp: NB đoán ra <i>trung lập</i> 5 lần dù chưa từng thấy nhãn đó. Kết quả 3 lớp không bị ảnh hưởng.</li></ul></section><details class="thuatngu"><summary>Thuật ngữ &amp; cách đọc kết quả</summary><ul><li><b>PhoW2V</b> — Bộ vector từ tiếng Việt huấn luyện sẵn của VinAI trên 20&nbsp;GB văn bản. Mỗi từ thành một dãy 100 số sao cho từ nghĩa gần nhau thì dãy số gần nhau. Nạp sẵn vào mô hình để nó không phải học nghĩa từ đầu chỉ bằng vài nghìn câu.</li><li><b>macro-F1</b> — Trung bình điểm F1 của cả ba lớp, mỗi lớp tính ngang nhau bất kể nhiều hay ít mẫu. Nghiêm khắc hơn accuracy: bỏ rơi lớp <i>trung lập</i> (chỉ 9,3% dữ liệu) là điểm tụt ngay, trong khi accuracy gần như không đổi.</li></ul><p>Ảnh là PNG 300&nbsp;dpi chèn thẳng vào Word được; mỗi bảng có thêm file <code>.csv</code> cùng tên. <b>Bấm vào ảnh</b> để phóng to. Hình có ảnh mẫu thì xếp hai cột — ảnh mẫu chỉ để đối chiếu bố cục, <b>số liệu hai bên không so trực tiếp được</b> vì khác tập dữ liệu và khác số lớp.</p></details>
 <h2>Bảng (10)</h2>
 <div class="card">
   

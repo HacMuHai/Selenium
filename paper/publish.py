@@ -14,6 +14,8 @@ import re
 import shutil
 from pathlib import Path
 
+from paper import changelog
+
 # Số của từng phiên bản đọc từ metadata.json lúc train, KHÔNG chép tay: chép tay là
 # nguồn số liệu thứ hai, và nó sẽ lệch với hình ngay lần deploy vội đầu tiên.
 MODEL_TEN = {"svm": "SVM", "lstm": "LSTM", "nb": "Naive Bayes", "lstm_w2v": "LSTM + PhoW2V"}
@@ -49,16 +51,19 @@ def so(n: int) -> str:
 
 
 def ma_phien_ban(version: str, trained_at: str) -> str:
-    """'v3' + '2026-08-12T...' -> 'v3-12082026'.
+    """'v3' + '2026-08-12T...' -> 'v3-260812' (YYMMDD).
+
+    Năm đứng trước nên xếp theo tên thư mục cũng ra đúng thứ tự thời gian - tiện khi
+    `ls` hoặc khi số phiên bản đã lên hai chữ số.
 
     Ngày lấy từ metadata lúc train, không phải ngày deploy: deploy lại một bản cũ
     tháng sau vẫn phải ra đúng mã cũ, nếu không sẽ mọc thêm thư mục trùng nội dung.
     Truyền sẵn mã đầy đủ thì giữ nguyên, để deploy đè đúng một phiên bản.
     """
-    if re.fullmatch(r"v\d+-\d{8}", version):
+    if re.fullmatch(r"v\d+-\d{6}", version):
         return version
-    nam, thang, ngay = trained_at[:4], trained_at[5:7], trained_at[8:10]
-    return f"{version}-{ngay}{thang}{nam}"
+    nam, thang, ngay = trained_at[2:4], trained_at[5:7], trained_at[8:10]
+    return f"{version}-{nam}{thang}{ngay}"
 
 
 def sinh_index(site: Path, versions: list[dict]) -> None:
@@ -181,7 +186,7 @@ def main() -> None:
         versions = nap_versions(site)
         for v in versions:
             if v["id"] == a.version:
-                v["label"] = a.label
+                v["label"] = a.label or changelog.tom_tat(a.version)
                 break
         else:
             raise SystemExit(f"Không thấy phiên bản {a.version} trên site")
@@ -201,7 +206,13 @@ def main() -> None:
     shutil.copytree(out, dich)
 
     ban["id"] = ma
-    ban["label"] = a.label
+    # Mô tả lấy từ changelog.py nếu không truyền tay -> khỏi chép hai chỗ rồi lệch nhau.
+    ban["label"] = a.label or changelog.tom_tat(ma)
+    if not ban["label"]:
+        raise SystemExit(
+            f"Phiên bản {ma} chưa có mô tả. Thêm mục cho {a.version} vào paper/changelog.py "
+            f"hoặc truyền --label."
+        )
     if a.id_file:
         Path(a.id_file).write_text(ma)
 
