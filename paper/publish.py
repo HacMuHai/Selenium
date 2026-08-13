@@ -77,7 +77,7 @@ def sinh_index(site: Path, versions: list[dict]) -> None:
     # Nhúng thẳng dữ liệu vào trang, không fetch versions.json: mở bằng file:// vẫn chạy.
     data = json.dumps([
         {
-            "id": v["id"], "label": v["label"], "ngay": v["trained_at"][:10],
+            "id": v["id"], "label": v["label"],
             "final_rows": so(v["final_rows"]), "total_rows": so(v["total_rows"]),
             # Thanh đầu trang hẹp -> viết tắt tên model. Tên đầy đủ có trong báo cáo.
             "f1": " · ".join(f"{MODEL_TAT.get(k, k.upper())} {s:.3f}".replace(".", ",")
@@ -141,8 +141,10 @@ const BAN = {data};
 const chon = document.getElementById('chon');
 const khung = document.getElementById('khung');
 
+// Không ghép ngày vào nhãn: mã phiên bản đã là vN-YYMMDD, in thêm "2026-08-12"
+// là nói hai lần cùng một thứ trong một dòng ngắn.
 BAN.forEach((v, i) => chon.add(new Option(
-  v.id + ' — ' + v.ngay + (i === 0 ? ' (mới nhất)' : ''), v.id)));
+  v.id + (i === 0 ? ' (mới nhất)' : ''), v.id)));
 
 function mo(id, ghiLichSu) {{
   const v = BAN.find(x => x.id === id) || BAN[0];
