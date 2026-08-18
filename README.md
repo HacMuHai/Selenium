@@ -1,7 +1,7 @@
 # Selenium Scraper
 
-Crawl comment sản phẩm từ thegioididong.com, lưu vào MongoDB, xuất Excel, và phục vụ
-qua REST API. Một codebase, ba entrypoint.
+Crawl comment sản phẩm từ **thegioididong.com, CellphoneS và FPT Shop**, lưu vào MongoDB,
+xuất Excel, và phục vụ qua REST API. Một codebase, ba entrypoint.
 
 > **Lệnh đã đổi.** Toàn bộ import dùng prefix `src.`, nên **mọi lệnh chạy từ thư mục gốc
 > của repo**: `python -m src.main` (KHÔNG còn `python src/main.py`) và
@@ -55,18 +55,39 @@ danh sách đầy đủ.
 ## Chạy crawler
 
 ```bash
-python -m src.main --help                 # xem toàn bộ flag
-python -m src.main --category phu-kien    # crawl 1 nhóm danh mục
-python -m src.main --links https://www.thegioididong.com/sac-cap --limit 1 --no-db --export
-python -m src.main --export-only          # chỉ xuất Excel từ DB, không mở Chrome
+python -m src.main --help                      # xem toàn bộ flag
+python -m src.main --category tgdd-phu-kien    # crawl 1 nhóm danh mục
+python -m src.main --category dtdd-tat-ca      # điện thoại của cả 3 sàn
+python -m src.main --links https://cellphones.com.vn/mobile.html --limit 1 --no-db --export
+python -m src.main --export-only               # chỉ xuất Excel từ DB, không mở Chrome
 ```
+
+Sàn được nhận diện theo hostname của URL, nên `--links` trộn nhiều sàn trong một lần chạy
+là hợp lệ. URL không thuộc sàn nào sẽ báo lỗi ngay, **trước khi** mở Chrome.
+
+### Ba sàn được hỗ trợ
+
+| Sàn | Danh sách sản phẩm | Comment lấy từ đâu |
+|---|---|---|
+| thegioididong.com | Chrome, phân trang `ul.pagination` | đọc DOM trang "xem tất cả đánh giá" |
+| cellphones.com.vn | Chrome, nút "Xem thêm N sản phẩm" | GraphQL `reviews` — chính API trang web dùng |
+| fptshop.com.vn | Chrome, nút "Xem thêm N kết quả" | REST `bff-before-order/comment/list` |
+
+Với CellphoneS và FPT Shop, khối đánh giá chỉ render sẵn 5 mục rồi lật trang bằng API.
+Gọi thẳng API đó lấy được **toàn bộ** đánh giá, nhanh hơn và ít vỡ hơn là bấm nút rồi
+đọc DOM — nên hai sàn này không mở Chrome cho từng sản phẩm, chỉ mở ở bước lấy danh sách.
+Chi tiết endpoint, header bắt buộc và cách lấy `product_id` / `upc` ghi trong docstring
+đầu `src/services/sites/cellphones.py` và `fptshop.py`.
+
+Prefix danh mục theo sàn: `tgdd-*`, `cps-*`, `fpt-*`; các nhóm `*-tat-ca` gộp cả ba sàn.
+Xem `src/config/targets.py` để biết danh sách đầy đủ.
 
 | Flag | Ý nghĩa |
 |---|---|
 | `--links URL [URL ...]` | Ghi đè danh sách link (bỏ qua `--category`) |
 | `--category NAME` | Nhóm định nghĩa trong `src/config/targets.py` |
 | `--no-db` | Không đọc & không ghi Mongo. Vì không đọc DB nên **sẽ crawl lại** cả sản phẩm đã có |
-| `--max-pages N` | Số trang danh mục tối đa mỗi link (mặc định 15) |
+| `--max-pages N` | Số trang danh mục tối đa mỗi link (mặc định 15). Với CellphoneS/FPT Shop là số lần bấm "Xem thêm" |
 | `--workers N` | Số thread song song |
 | `--export [DIR]` | Xuất Excel sau khi crawl |
 | `--export-only` | Chỉ export từ DB (không dùng chung với `--no-db`) |
@@ -169,8 +190,15 @@ MongoDB hỏng **không** làm app sập: `/products` trả 503, `/analyze` vẫ
 python -m pytest -q
 ```
 
-Test chạy hoàn toàn offline bằng `mongomock` — không đụng Atlas. Riêng phần crawl phụ
-thuộc selector của thegioididong nên chỉ smoke-test thủ công, không đưa vào CI.
+Test chạy hoàn toàn offline bằng `mongomock` — không đụng Atlas. `tests/test_sites.py` phủ
+phần chọn sàn theo URL và phần parse JSON của CellphoneS / FPT Shop. Riêng selector DOM và
+API thật thì phụ thuộc trang đích nên chỉ smoke-test thủ công, không đưa vào CI:
+
+```bash
+python -m src.main --links https://www.thegioididong.com/sac-cap --limit 2 --no-db
+python -m src.main --links https://cellphones.com.vn/mobile.html --limit 2 --no-db
+python -m src.main --links https://fptshop.com.vn/dien-thoai --limit 2 --no-db
+```
 
 ## Cấu trúc
 
@@ -192,7 +220,13 @@ src/
 │   ├── product_repository.py     # Mongo
 │   └── memory_repository.py      # In-memory cho --no-db (cùng interface)
 ├── services/
-│   ├── scraper_service.py        # Nhận repository qua DI
+│   ├── scraper_service.py        # Điều phối: chọn sàn theo URL, nhận repository qua DI
+│   ├── sites/
+│   │   ├── __init__.py           # get_site(url) - registry theo hostname
+│   │   ├── base.py               # SiteScraper + helper "Xem thêm" + client httpx dùng chung
+│   │   ├── tgdd.py               # đọc DOM
+│   │   ├── cellphones.py         # GraphQL reviews
+│   │   └── fptshop.py            # REST comment/list
 │   ├── export_service.py
 │   ├── product_service.py
 │   └── errors.py                 # AppError + status_code
@@ -203,14 +237,20 @@ tests/                            # mongomock, không cần Mongo thật
 **Schema MongoDB** (giữ nguyên, không migrate): 1 document = 1 product, comments lồng bên trong.
 
 ```json
-{ "_id": "…", "name": "…", "link": "…",
+{ "_id": "…", "name": "…", "link": "…", "site": "cellphones",
   "comments": [{ "id": "…", "name": "…", "content": "…", "rating": 5 }],
   "total_comments": 1, "crawled_at": "…", "version": "1.0" }
 ```
 
+`site` là field **mới**, thêm khi crawl 3 sàn; document crawl trước đó không có field này.
+
 ## Lưu ý vận hành
 
-- Selector của thegioididong có thể đổi bất cứ lúc nào → crawl trả 0 comment sẽ được log
-  ở mức `WARNING` kèm tổng kết cuối run.
+- Selector và API của cả ba sàn có thể đổi bất cứ lúc nào → crawl trả 0 comment sẽ được
+  log ở mức `WARNING` kèm tổng kết cuối run.
+- **FPT Shop trả nhiều câu hỏi giá hơn là nhận xét sản phẩm.** Galaxy S25 Ultra: 163 mục
+  nhưng chỉ 12 mục có sao. Bộ lọc `commentType: ["RATING"]` của chính trang web không tách
+  được, nên crawler giữ lại tất cả (`rating` = 0 khi không chấm sao) và việc lọc để dành
+  cho tầng phân tích. CellphoneS thì ngược lại: mọi review đều có sao.
 - `--workers` mặc định 3; đừng nâng cao quá (lịch sự với site đích, và mỗi Chrome tốn RAM).
 - File Excel sinh ra nằm trong `excel_*/` và đã được gitignore — chứa dữ liệu crawl.
