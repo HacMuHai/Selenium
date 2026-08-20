@@ -14,9 +14,14 @@ import re
 import shutil
 from pathlib import Path
 
+from paper import changelog
+
 # Số của từng phiên bản đọc từ metadata.json lúc train, KHÔNG chép tay: chép tay là
 # nguồn số liệu thứ hai, và nó sẽ lệch với hình ngay lần deploy vội đầu tiên.
-MODEL_TEN = {"svm": "SVM", "lstm": "LSTM", "nb": "Naive Bayes"}
+MODEL_TEN = {"svm": "SVM", "lstm": "LSTM", "nb": "Naive Bayes", "lstm_w2v": "LSTM + PhoW2V"}
+# Bản ngắn cho thanh đầu trang (hẹp). Không dùng `.upper()`: "lstm_w2v" thành
+# "LSTM_W2V", đọc như tên biến chứ không phải tên mô hình.
+MODEL_TAT = {"svm": "SVM", "lstm": "LSTM", "nb": "NB", "lstm_w2v": "LSTM+W2V"}
 
 
 def doc_metadata(path: Path) -> dict:
@@ -46,16 +51,19 @@ def so(n: int) -> str:
 
 
 def ma_phien_ban(version: str, trained_at: str) -> str:
-    """'v3' + '2026-08-12T...' -> 'v3-12082026'.
+    """'v3' + '2026-08-12T...' -> 'v3-260812' (YYMMDD).
+
+    Năm đứng trước nên xếp theo tên thư mục cũng ra đúng thứ tự thời gian - tiện khi
+    `ls` hoặc khi số phiên bản đã lên hai chữ số.
 
     Ngày lấy từ metadata lúc train, không phải ngày deploy: deploy lại một bản cũ
     tháng sau vẫn phải ra đúng mã cũ, nếu không sẽ mọc thêm thư mục trùng nội dung.
     Truyền sẵn mã đầy đủ thì giữ nguyên, để deploy đè đúng một phiên bản.
     """
-    if re.fullmatch(r"v\d+-\d{8}", version):
+    if re.fullmatch(r"v\d+-\d{6}", version):
         return version
-    nam, thang, ngay = trained_at[:4], trained_at[5:7], trained_at[8:10]
-    return f"{version}-{ngay}{thang}{nam}"
+    nam, thang, ngay = trained_at[2:4], trained_at[5:7], trained_at[8:10]
+    return f"{version}-{nam}{thang}{ngay}"
 
 
 def sinh_index(site: Path, versions: list[dict]) -> None:
@@ -69,10 +77,10 @@ def sinh_index(site: Path, versions: list[dict]) -> None:
     # Nhúng thẳng dữ liệu vào trang, không fetch versions.json: mở bằng file:// vẫn chạy.
     data = json.dumps([
         {
-            "id": v["id"], "label": v["label"], "ngay": v["trained_at"][:10],
+            "id": v["id"], "label": v["label"],
             "final_rows": so(v["final_rows"]), "total_rows": so(v["total_rows"]),
             # Thanh đầu trang hẹp -> viết tắt tên model. Tên đầy đủ có trong báo cáo.
-            "f1": " · ".join(f"{k.upper()} {s:.3f}".replace(".", ",")
+            "f1": " · ".join(f"{MODEL_TAT.get(k, k.upper())} {s:.3f}".replace(".", ",")
                              for k, s in v["models"].items()),
         }
         for v in versions
@@ -133,8 +141,10 @@ const BAN = {data};
 const chon = document.getElementById('chon');
 const khung = document.getElementById('khung');
 
+// Không ghép ngày vào nhãn: mã phiên bản đã là vN-YYMMDD, in thêm "2026-08-12"
+// là nói hai lần cùng một thứ trong một dòng ngắn.
 BAN.forEach((v, i) => chon.add(new Option(
-  v.id + ' — ' + v.ngay + (i === 0 ? ' (mới nhất)' : ''), v.id)));
+  v.id + (i === 0 ? ' (mới nhất)' : ''), v.id)));
 
 function mo(id, ghiLichSu) {{
   const v = BAN.find(x => x.id === id) || BAN[0];
@@ -164,11 +174,31 @@ def main() -> None:
     p.add_argument("--out", default="paper/out", help="Thư mục hình vừa build")
     p.add_argument("--metadata", default="paper/data/metadata.json")
     p.add_argument("--version", required=True, help="Mã phiên bản, ví dụ v3 (ngày tự thêm)")
-    p.add_argument("--label", default="", help="Mô tả ngắn phiên bản")
+    p.add_argument("--label", default="", help="Mô tả phiên bản này nâng cấp những gì")
     p.add_argument("--id-file", help="Ghi mã phiên bản đầy đủ ra file, cho deploy.sh đọc")
+    p.add_argument("--relabel", action="store_true",
+                   help="Chỉ sửa mô tả của phiên bản đã có, không đụng vào hình")
     a = p.parse_args()
 
     site, out = Path(a.site), Path(a.out)
+
+    if a.relabel:
+        # Sửa mô tả bản cũ: số liệu giữ nguyên trong versions.json, metadata.json hiện
+        # tại là của bản MỚI nên không được đọc lại - đọc vào là ghi đè số của bản cũ.
+        versions = nap_versions(site)
+        for v in versions:
+            if v["id"] == a.version:
+                v["label"] = a.label or changelog.tom_tat(a.version)
+                break
+        else:
+            raise SystemExit(f"Không thấy phiên bản {a.version} trên site")
+        site.joinpath("versions.json").write_text(
+            json.dumps(versions, ensure_ascii=False, indent=2)
+        )
+        sinh_index(site, versions)
+        print(f"  {a.version}: đã đổi mô tả")
+        return
+
     ban = doc_metadata(Path(a.metadata))
     ma = ma_phien_ban(a.version, ban["trained_at"])
 
@@ -178,7 +208,13 @@ def main() -> None:
     shutil.copytree(out, dich)
 
     ban["id"] = ma
-    ban["label"] = a.label
+    # Mô tả lấy từ changelog.py nếu không truyền tay -> khỏi chép hai chỗ rồi lệch nhau.
+    ban["label"] = a.label or changelog.tom_tat(ma)
+    if not ban["label"]:
+        raise SystemExit(
+            f"Phiên bản {ma} chưa có mô tả. Thêm mục cho {a.version} vào paper/changelog.py "
+            f"hoặc truyền --label."
+        )
     if a.id_file:
         Path(a.id_file).write_text(ma)
 

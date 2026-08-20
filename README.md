@@ -1,7 +1,7 @@
 # Selenium Scraper
 
-Crawl comment sản phẩm từ thegioididong.com, lưu vào MongoDB, xuất Excel, và phục vụ
-qua REST API. Một codebase, ba entrypoint.
+Crawl comment sản phẩm từ **thegioididong.com, CellphoneS và FPT Shop**, lưu vào MongoDB,
+xuất Excel, và phục vụ qua REST API. Một codebase, ba entrypoint.
 
 > **Lệnh đã đổi.** Toàn bộ import dùng prefix `src.`, nên **mọi lệnh chạy từ thư mục gốc
 > của repo**: `python -m src.main` (KHÔNG còn `python src/main.py`) và
@@ -55,18 +55,43 @@ danh sách đầy đủ.
 ## Chạy crawler
 
 ```bash
-python -m src.main --help                 # xem toàn bộ flag
-python -m src.main --category phu-kien    # crawl 1 nhóm danh mục
-python -m src.main --links https://www.thegioididong.com/sac-cap --limit 1 --no-db --export
-python -m src.main --export-only          # chỉ xuất Excel từ DB, không mở Chrome
+python -m src.main --help                      # xem toàn bộ flag
+python -m src.main --category tgdd-phu-kien    # crawl 1 nhóm danh mục
+python -m src.main --category dtdd-tat-ca      # điện thoại của cả 3 sàn
+python -m src.main --links https://cellphones.com.vn/mobile.html --limit 1 --no-db --export
+python -m src.main --export-only               # chỉ xuất Excel từ DB, không mở Chrome
 ```
+
+Không có Mongo vẫn crawl được: `--no-db --export data` giữ dữ liệu trong RAM rồi ghi
+thẳng ra Excel. Khi nào dựng lại được DB thì nạp ngược bằng `python -m src.import_excel`
+(xem [Export & import Excel](#export--import-excel)).
+
+Sàn được nhận diện theo hostname của URL, nên `--links` trộn nhiều sàn trong một lần chạy
+là hợp lệ. URL không thuộc sàn nào sẽ báo lỗi ngay, **trước khi** mở Chrome.
+
+### Ba sàn được hỗ trợ
+
+| Sàn | Danh sách sản phẩm | Comment lấy từ đâu |
+|---|---|---|
+| thegioididong.com | Chrome, phân trang `ul.pagination` | đọc DOM trang "xem tất cả đánh giá" |
+| cellphones.com.vn | Chrome, nút "Xem thêm N sản phẩm" | GraphQL `reviews` — chính API trang web dùng |
+| fptshop.com.vn | Chrome, nút "Xem thêm N kết quả" | REST `bff-before-order/comment/list` |
+
+Với CellphoneS và FPT Shop, khối đánh giá chỉ render sẵn 5 mục rồi lật trang bằng API.
+Gọi thẳng API đó lấy được **toàn bộ** đánh giá, nhanh hơn và ít vỡ hơn là bấm nút rồi
+đọc DOM — nên hai sàn này không mở Chrome cho từng sản phẩm, chỉ mở ở bước lấy danh sách.
+Chi tiết endpoint, header bắt buộc và cách lấy `product_id` / `upc` ghi trong docstring
+đầu `src/services/sites/cellphones.py` và `fptshop.py`.
+
+Prefix danh mục theo sàn: `tgdd-*`, `cps-*`, `fpt-*`; các nhóm `*-tat-ca` gộp cả ba sàn.
+Xem `src/config/targets.py` để biết danh sách đầy đủ.
 
 | Flag | Ý nghĩa |
 |---|---|
 | `--links URL [URL ...]` | Ghi đè danh sách link (bỏ qua `--category`) |
 | `--category NAME` | Nhóm định nghĩa trong `src/config/targets.py` |
 | `--no-db` | Không đọc & không ghi Mongo. Vì không đọc DB nên **sẽ crawl lại** cả sản phẩm đã có |
-| `--max-pages N` | Số trang danh mục tối đa mỗi link (mặc định 15) |
+| `--max-pages N` | Số trang danh mục tối đa mỗi link (mặc định 15). Với CellphoneS/FPT Shop là số lần bấm "Xem thêm" |
 | `--workers N` | Số thread song song |
 | `--export [DIR]` | Xuất Excel sau khi crawl |
 | `--export-only` | Chỉ export từ DB (không dùng chung với `--no-db`) |
@@ -75,6 +100,58 @@ python -m src.main --export-only          # chỉ xuất Excel từ DB, không m
 | `--attach HOST:PORT` | Attach vào Chrome đang mở sẵn (xem dưới) |
 | `--version-tag STR` | Ghi đè `config.version.version` cho lần chạy này |
 | `--log-level LEVEL` | |
+
+## Crawl trọn CellphoneS + FPT Shop
+
+```bash
+./run_crawl_all.sh           # crawl 11 nhóm vào Mongo rồi xuất Excel
+./run_crawl_all.sh --export  # chỉ xuất lại Excel từ Mongo
+```
+
+Chạy lại được nhiều lần: script nối Mongo nên `exists_by_link` bỏ qua sản phẩm đã có,
+bị chặn giữa chừng cứ chạy lại là tiếp từ chỗ dở. Mặc định 2 luồng; nhóm nào bị chặn thì
+tự nghỉ 15 phút rồi chạy lại nhóm đó với 1 luồng. Log ghi vào `logs/crawl-<thời điểm>.log`.
+
+`--workers` là số **luồng gọi API**, KHÔNG phải số Chrome: với CellphoneS và FPT Shop chỉ
+có đúng 1 Chrome cho bước lấy danh sách sản phẩm, còn comment lấy qua HTTP. Riêng
+thegioididong thì mỗi luồng 1 Chrome vì comment phải đọc DOM.
+
+## Export & import Excel
+
+Excel xuất ra **tách thư mục theo sàn**, mỗi sàn đánh số file riêng:
+
+```
+data/
+├── thegioididong/comments_export_1.xlsx …
+├── cellphones/comments_export_1.xlsx …
+└── fptshop/comments_export_1.xlsx …
+```
+
+Sàn lấy từ field `site`; document cũ chưa có field này thì suy từ hostname của `link`
+(link lạ rơi vào thư mục `khac/`). Header 7 cột:
+
+| Cột | Ghi chú |
+|---|---|
+| `link`, `name_item` | Chỉ điền ở dòng ĐẦU mỗi product, dòng sau để trống cho dễ đọc |
+| `comments_id`, `comments_content` | |
+| `site`, `user_name`, `rating` | Ba cột **thêm**, để import dựng lại đúng document Mongo |
+
+Bốn cột đầu giữ nguyên tên như bản cũ, và `paper/analysis/dataset.py` đọc theo *tên* cột
+nên file mới lẫn file 4 cột cũ đều dùng được cho tầng phân tích. Lưu ý `iter_untagged_files`
+quét **không đệ quy** — trỏ `--input data/cellphones` chứ không phải `--input data`.
+
+### Nạp Excel trở lại Mongo
+
+```bash
+python -m src.import_excel --input data --dry-run       # xem trước, không ghi gì
+python -m src.import_excel --input data                 # product đã có trong DB thì bỏ qua
+python -m src.import_excel --input data/cellphones --mode replace   # ghi đè
+```
+
+Quét **đệ quy** nên trỏ vào `data/` là nạp cả các thư mục con theo sàn. Gom theo `link`
+trên toàn bộ thư mục trước khi ghi, nên product bị cắt sang nhiều file vẫn về đúng một
+document; comment trùng `comments_id` chỉ giữ một bản. `crawled_at` là thời điểm import,
+không phải thời điểm crawl gốc — Excel không lưu mốc đó.
 
 ### Giữ browser ấm khi dev
 
@@ -116,7 +193,7 @@ Router `/comments` cũ đã bị xoá (trả toàn `null` do đọc sai schema).
 Entrypoint **riêng**, chạy độc lập với crawler và không cần MongoDB:
 
 ```bash
-python -m src.analyze train --models nb,svm,lstm --report report.html
+python -m src.analyze train --report report.html
 python -m src.analyze evaluate --report report.html --csv metrics.csv
 python -m src.analyze predict --text "Sản phẩm dùng rất tốt"
 python -m src.analyze predict --input data --output data_predicted --model svm
@@ -169,8 +246,15 @@ MongoDB hỏng **không** làm app sập: `/products` trả 503, `/analyze` vẫ
 python -m pytest -q
 ```
 
-Test chạy hoàn toàn offline bằng `mongomock` — không đụng Atlas. Riêng phần crawl phụ
-thuộc selector của thegioididong nên chỉ smoke-test thủ công, không đưa vào CI.
+Test chạy hoàn toàn offline bằng `mongomock` — không đụng Atlas. `tests/test_sites.py` phủ
+phần chọn sàn theo URL và phần parse JSON của CellphoneS / FPT Shop. Riêng selector DOM và
+API thật thì phụ thuộc trang đích nên chỉ smoke-test thủ công, không đưa vào CI:
+
+```bash
+python -m src.main --links https://www.thegioididong.com/sac-cap --limit 2 --no-db
+python -m src.main --links https://cellphones.com.vn/mobile.html --limit 2 --no-db
+python -m src.main --links https://fptshop.com.vn/dien-thoai --limit 2 --no-db
+```
 
 ## Cấu trúc
 
@@ -192,8 +276,15 @@ src/
 │   ├── product_repository.py     # Mongo
 │   └── memory_repository.py      # In-memory cho --no-db (cùng interface)
 ├── services/
-│   ├── scraper_service.py        # Nhận repository qua DI
-│   ├── export_service.py
+│   ├── scraper_service.py        # Điều phối: chọn sàn theo URL, nhận repository qua DI
+│   ├── sites/
+│   │   ├── __init__.py           # get_site(url) - registry theo hostname
+│   │   ├── base.py               # SiteScraper + helper "Xem thêm" + client httpx dùng chung
+│   │   ├── tgdd.py               # đọc DOM
+│   │   ├── cellphones.py         # GraphQL reviews
+│   │   └── fptshop.py            # REST comment/list
+│   ├── export_service.py         # -> data/<sàn>/*.xlsx
+│   ├── import_service.py         # Excel -> document Mongo (đường ngược)
 │   ├── product_service.py
 │   └── errors.py                 # AppError + status_code
 └── utils/helpers.py              # wait_for / click_safe / wait_count_grows
@@ -203,14 +294,20 @@ tests/                            # mongomock, không cần Mongo thật
 **Schema MongoDB** (giữ nguyên, không migrate): 1 document = 1 product, comments lồng bên trong.
 
 ```json
-{ "_id": "…", "name": "…", "link": "…",
+{ "_id": "…", "name": "…", "link": "…", "site": "cellphones",
   "comments": [{ "id": "…", "name": "…", "content": "…", "rating": 5 }],
   "total_comments": 1, "crawled_at": "…", "version": "1.0" }
 ```
 
+`site` là field **mới**, thêm khi crawl 3 sàn; document crawl trước đó không có field này.
+
 ## Lưu ý vận hành
 
-- Selector của thegioididong có thể đổi bất cứ lúc nào → crawl trả 0 comment sẽ được log
-  ở mức `WARNING` kèm tổng kết cuối run.
+- Selector và API của cả ba sàn có thể đổi bất cứ lúc nào → crawl trả 0 comment sẽ được
+  log ở mức `WARNING` kèm tổng kết cuối run.
+- **FPT Shop trả nhiều câu hỏi giá hơn là nhận xét sản phẩm.** Galaxy S25 Ultra: 163 mục
+  nhưng chỉ 12 mục có sao. Bộ lọc `commentType: ["RATING"]` của chính trang web không tách
+  được, nên crawler giữ lại tất cả (`rating` = 0 khi không chấm sao) và việc lọc để dành
+  cho tầng phân tích. CellphoneS thì ngược lại: mọi review đều có sao.
 - `--workers` mặc định 3; đừng nâng cao quá (lịch sự với site đích, và mỗi Chrome tốn RAM).
-- File Excel sinh ra nằm trong `excel_*/` và đã được gitignore — chứa dữ liệu crawl.
+- File Excel sinh ra nằm trong `data/<sàn>/` — chứa dữ liệu crawl, không commit.

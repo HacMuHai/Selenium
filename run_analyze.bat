@@ -13,8 +13,10 @@ if not exist "venv" (
 call venv\Scripts\activate.bat
 
 if not exist "models_store\metadata.json" (
-    echo [INFO] Chua co model, dang train (khoang 15 giay)...
-    python -m src.analyze train --models nb,svm,lstm
+    echo [INFO] Chua co model, dang train (khoang 30 giay)...
+    REM KHONG ghi cung danh sach model: mac dinh cua lenh train la available_names(),
+    REM them model moi vao registry la script nay tu co.
+    python -m src.analyze train
 )
 
 echo.

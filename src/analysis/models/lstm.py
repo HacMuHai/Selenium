@@ -21,6 +21,7 @@ ARTIFACT_MODEL = "lstm.keras"
 ARTIFACT_META = "lstm_meta.joblib"
 
 VOCAB_SIZE = 5000
+EMBEDDING_DIM = 100
 MIN_LENGTH = 10
 LABEL_TO_ID = {label: i for i, label in enumerate(LABELS)}
 ID_TO_LABEL = {i: label for label, i in LABEL_TO_ID.items()}
@@ -34,6 +35,10 @@ def tensorflow_available() -> bool:
 
 class LSTMModel(SentimentModel):
     name = "lstm"
+    # Thuộc tính lớp chứ không phải hằng module: lớp con `lstm_w2v` phải ghi ra file
+    # KHÁC, nếu dùng chung tên thì model train sau đè mất model train trước.
+    artifact_model = ARTIFACT_MODEL
+    artifact_meta = ARTIFACT_META
 
     def __init__(self, epochs: int = 5, seed: int = 42) -> None:
         self.model = None
@@ -42,13 +47,19 @@ class LSTMModel(SentimentModel):
         self.epochs = epochs
         self.seed = seed
 
+    def _embedding_layer(self):
+        """Khởi tạo ngẫu nhiên. Lớp con nạp vector tiền huấn luyện thì ghi đè hàm này."""
+        import tensorflow as tf
+
+        return tf.keras.layers.Embedding(VOCAB_SIZE, EMBEDDING_DIM)
+
     def _build(self, max_length: int):
         import tensorflow as tf
 
         model = tf.keras.Sequential(
             [
                 tf.keras.layers.Input(shape=(max_length,)),
-                tf.keras.layers.Embedding(VOCAB_SIZE, 100),
+                self._embedding_layer(),
                 tf.keras.layers.LSTM(64, return_sequences=True),
                 tf.keras.layers.LSTM(32),
                 tf.keras.layers.Dense(64, activation="relu"),
@@ -125,24 +136,24 @@ class LSTMModel(SentimentModel):
 
     def save(self, models_dir: Path) -> None:
         models_dir.mkdir(parents=True, exist_ok=True)
-        self.model.save(models_dir / ARTIFACT_MODEL)
+        self.model.save(models_dir / self.artifact_model)
         joblib.dump(
             {
                 "version": PREPROCESSING_VERSION,
                 "tokenizer": self.tokenizer,
                 "max_length": self.max_length,
             },
-            models_dir / ARTIFACT_META,
+            models_dir / self.artifact_meta,
         )
 
     @classmethod
     def load(cls, models_dir: Path) -> "LSTMModel":
         import tensorflow as tf
 
-        payload = joblib.load(models_dir / ARTIFACT_META)
+        payload = joblib.load(models_dir / cls.artifact_meta)
         cls._check_version(payload.get("version"))
         model = cls()
         model.tokenizer = payload["tokenizer"]
         model.max_length = payload["max_length"]
-        model.model = tf.keras.models.load_model(models_dir / ARTIFACT_MODEL)
+        model.model = tf.keras.models.load_model(models_dir / cls.artifact_model)
         return model

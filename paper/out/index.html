@@ -16,6 +16,18 @@ body { margin:0; padding:2.5rem 1.5rem 4rem; background:var(--bg); color:var(--f
 main { max-width:62rem; margin:0 auto; }
 h1 { font-size:1.7rem; margin:0 0 .3rem; letter-spacing:-.01em; }
 .sub { color:var(--mut); margin:0 0 1.5rem; }
+.moi { border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:.5rem;
+       background:var(--card); padding:1rem 1.2rem .9rem; margin:1.4rem 0 .8rem; }
+.moi h3 { margin:0 0 .7rem; font-size:1rem; letter-spacing:-.01em; }
+.moi ul, .thuatngu ul { margin:0; padding-left:1.1rem; }
+.moi li { margin-bottom:.65rem; }
+.moi li:last-child { margin-bottom:0; }
+.moi li b { font-size:.95rem; }
+.thuatngu { border:1px solid var(--line); border-radius:.5rem; background:var(--card);
+            padding:.6rem .9rem; margin:0 0 1.6rem; color:var(--mut); font-size:.88rem; }
+.thuatngu summary { cursor:pointer; font-weight:600; color:var(--fg); }
+.thuatngu[open] summary { margin-bottom:.6rem; }
+.thuatngu li { margin-bottom:.5rem; }
 h2 { font-size:1.15rem; margin:3rem 0 1rem; padding-bottom:.4rem;
      border-bottom:1px solid var(--line); }
 .stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1.2rem 0 0; }
@@ -81,17 +93,10 @@ footer { margin-top:3.5rem; color:var(--mut); font-size:.82rem;
 <main>
 <h1>Hình cho bài báo</h1>
 <p class="sub">Phân tích cảm xúc bình luận sản phẩm tiếng Việt · kết quả huấn luyện
-lúc 2026-08-12T09:39:21</p>
-<div class="stats"><div class="stat"><b>4.037</b><span>bình luận sau làm sạch</span></div><div class="stat"><b>3.229 / 808</b><span>train / test</span></div><div class="stat"><b>3</b><span>mô hình so sánh</span></div><div class="stat"><b>0.831</b><span>macro-F1 tốt nhất (SVM)</span></div></div>
-<p class="note">Toàn bộ ảnh là PNG 300&nbsp;dpi, chèn thẳng vào Word được. Mỗi bảng có
-thêm một file <code>.csv</code> cùng tên nếu bạn muốn tự định dạng lại trong Excel.
-Số thứ tự hình ở đây chỉ để tham chiếu nhanh — khi đưa vào bài, đánh số lại theo
-bố cục chương của bạn. <b>Bấm vào ảnh</b> để phóng to, bấm tiếp để xem cỡ thật.</p>
-<p class="note">Hình nào có ảnh mẫu tương ứng thì xếp <b>hai cột</b>: kết quả của bạn
-bên trái, ảnh mẫu từ bài tham khảo bên phải. Ảnh mẫu chỉ để đối chiếu bố cục và
-cách trình bày — <b>số liệu hai bên không so trực tiếp được</b> vì khác tập dữ liệu
-và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
-<h2>Bảng (9)</h2>
+lúc 2026-08-12T11:45:47</p>
+<div class="stats"><div class="stat"><b>4.037</b><span>bình luận sau làm sạch</span></div><div class="stat"><b>3.229 / 808</b><span>train / test</span></div><div class="stat"><b>4</b><span>mô hình so sánh</span></div><div class="stat"><b>0.831</b><span>macro-F1 tốt nhất (SVM)</span></div></div>
+<section class="moi"><h3>Có gì mới ở phiên bản v3</h3><ul><li><b>Thêm mô hình thứ tư: LSTM + PhoW2V</b><br>LSTM cũ khởi tạo vector từ ngẫu nhiên rồi tự học nghĩa từ 3.229 câu — quá ít. Bản mới nạp sẵn vector đã học từ 20&nbsp;GB văn bản tiếng Việt. Đo trên 5 lần chia dữ liệu: macro-F1 <b>0,772</b> so với <b>0,763</b> của bản cũ. Nhỏ, nhưng riêng lớp <i>trung lập</i> tăng mạnh: <b>58,9% → 70,2%</b>.</li><li><b>Thêm bảng kết quả 2 lớp</b><br>Phần lớn bài báo cùng chủ đề chỉ phân tích cực/tiêu cực, bỏ lớp trung lập, nên con số của họ cao hơn. Bảng mới cho thấy cùng bộ dữ liệu này đặt về 2 lớp thì SVM đạt <b>91,5%</b> — tương đương các bài đã công bố. Bảng chính vẫn là 3 lớp.</li><li><b>Sửa lỗi Naive Bayes đoán ra lớp không có dữ liệu</b><br>Mô hình duyệt danh sách nhãn cố định nên một lớp <b>không có mẫu huấn luyện nào</b> vẫn có thể được đoán ra. Chỉ lộ khi chạy bảng 2 lớp: NB đoán ra <i>trung lập</i> 5 lần dù chưa từng thấy nhãn đó. Kết quả 3 lớp không bị ảnh hưởng.</li></ul></section><details class="thuatngu"><summary>Thuật ngữ &amp; cách đọc kết quả</summary><ul><li><b>PhoW2V</b> — Bộ vector từ tiếng Việt huấn luyện sẵn của VinAI trên 20&nbsp;GB văn bản. Mỗi từ thành một dãy 100 số sao cho từ nghĩa gần nhau thì dãy số gần nhau. Nạp sẵn vào mô hình để nó không phải học nghĩa từ đầu chỉ bằng vài nghìn câu.</li><li><b>macro-F1</b> — Trung bình điểm F1 của cả ba lớp, mỗi lớp tính ngang nhau bất kể nhiều hay ít mẫu. Nghiêm khắc hơn accuracy: bỏ rơi lớp <i>trung lập</i> (chỉ 9,3% dữ liệu) là điểm tụt ngay, trong khi accuracy gần như không đổi.</li></ul><p>Ảnh là PNG 300&nbsp;dpi chèn thẳng vào Word được; mỗi bảng có thêm file <code>.csv</code> cùng tên. <b>Bấm vào ảnh</b> để phóng to. Hình có ảnh mẫu thì xếp hai cột — ảnh mẫu chỉ để đối chiếu bố cục, <b>số liệu hai bên không so trực tiếp được</b> vì khác tập dữ liệu và khác số lớp.</p></details>
+<h2>Bảng (10)</h2>
 <div class="card">
   
   <div class="compare">
@@ -152,12 +157,12 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
 <div class="card">
   
   <div class="compare">
-    <div class="side"><span class="tag mine">Kết quả của bạn</span><figure class="mine"><img src="bang/bang-precision-recall.png" alt="Precision và Recall của ba thuật toán" loading="lazy"></figure></div>
+    <div class="side"><span class="tag mine">Kết quả của bạn</span><figure class="mine"><img src="bang/bang-precision-recall.png" alt="Precision và Recall của các mô hình" loading="lazy"></figure></div>
     <div class="side"><span class="tag ref">Ảnh mẫu để đối chiếu</span><figure class="ref"><img src="anh-mau/mau-bang-5-2-ket-qua-huan-luyen.jpg" alt="Bảng 5.2: Kết quả huấn luyện với 3000 bình luận" loading="lazy"><figcaption>Bảng 5.2: Kết quả huấn luyện với 3000 bình luận</figcaption></figure></div>
   </div>
   <div class="meta">
-    <div class="cap"><b>Hình 6: Precision và Recall của ba thuật toán</b><i><code>bang/bang-precision-recall.png</code></i></div>
-    <button type="button" data-copy="Hình 6: Precision và Recall của ba thuật toán">Copy caption</button>
+    <div class="cap"><b>Hình 6: Precision và Recall của các mô hình</b><i><code>bang/bang-precision-recall.png</code></i></div>
+    <button type="button" data-copy="Hình 6: Precision và Recall của các mô hình">Copy caption</button>
     <button type="button" data-copy="bang/bang-precision-recall.png">Copy tên file</button>
     <a class="btn" href="bang/bang-precision-recall.png" download>Tải ảnh</a>
   </div>
@@ -165,12 +170,12 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
 <div class="card">
   
   <div class="compare">
-    <div class="side"><span class="tag mine">Kết quả của bạn</span><figure class="mine"><img src="bang/bang-fscore.png" alt="Kết quả F-score của ba thuật toán" loading="lazy"></figure></div>
+    <div class="side"><span class="tag mine">Kết quả của bạn</span><figure class="mine"><img src="bang/bang-fscore.png" alt="Kết quả F-score của các mô hình" loading="lazy"></figure></div>
     <div class="side"><span class="tag ref">Ảnh mẫu để đối chiếu</span><figure class="ref"><img src="anh-mau/mau-bieu-do-5-2-va-bang-5-5.jpg" alt="Bảng 5.5: Kết quả thực nghiệm với 3000 bình luận (kèm Biểu đồ 5.2)" loading="lazy"><figcaption>Bảng 5.5: Kết quả thực nghiệm với 3000 bình luận (kèm Biểu đồ 5.2)</figcaption></figure></div>
   </div>
   <div class="meta">
-    <div class="cap"><b>Hình 7: Kết quả F-score của ba thuật toán</b><i><code>bang/bang-fscore.png</code></i></div>
-    <button type="button" data-copy="Hình 7: Kết quả F-score của ba thuật toán">Copy caption</button>
+    <div class="cap"><b>Hình 7: Kết quả F-score của các mô hình</b><i><code>bang/bang-fscore.png</code></i></div>
+    <button type="button" data-copy="Hình 7: Kết quả F-score của các mô hình">Copy caption</button>
     <button type="button" data-copy="bang/bang-fscore.png">Copy tên file</button>
     <a class="btn" href="bang/bang-fscore.png" download>Tải ảnh</a>
   </div>
@@ -192,12 +197,21 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
     <button type="button" data-copy="bang/bang-vi-du-doan-sai.png">Copy tên file</button>
     <a class="btn" href="bang/bang-vi-du-doan-sai.png" download>Tải ảnh</a>
   </div>
-</div><h2>Biểu đồ (8)</h2>
+</div>
+<div class="card">
+  <figure class="mine"><img src="bang/bang-2-lop.png" alt="Kết quả trên bài toán 2 lớp (bỏ trung lập)" loading="lazy"></figure>
+  <div class="meta">
+    <div class="cap"><b>Hình 10: Kết quả trên bài toán 2 lớp (bỏ trung lập)</b><i><code>bang/bang-2-lop.png</code></i></div>
+    <button type="button" data-copy="Hình 10: Kết quả trên bài toán 2 lớp (bỏ trung lập)">Copy caption</button>
+    <button type="button" data-copy="bang/bang-2-lop.png">Copy tên file</button>
+    <a class="btn" href="bang/bang-2-lop.png" download>Tải ảnh</a>
+  </div>
+</div><h2>Biểu đồ (9)</h2>
 <div class="card">
   <figure class="mine"><img src="bieu-do/bd-phan-bo-nhan.png" alt="Phân bố nhãn sau khi làm sạch" loading="lazy"></figure>
   <div class="meta">
-    <div class="cap"><b>Hình 10: Phân bố nhãn sau khi làm sạch</b><i><code>bieu-do/bd-phan-bo-nhan.png</code></i></div>
-    <button type="button" data-copy="Hình 10: Phân bố nhãn sau khi làm sạch">Copy caption</button>
+    <div class="cap"><b>Hình 11: Phân bố nhãn sau khi làm sạch</b><i><code>bieu-do/bd-phan-bo-nhan.png</code></i></div>
+    <button type="button" data-copy="Hình 11: Phân bố nhãn sau khi làm sạch">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-phan-bo-nhan.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-phan-bo-nhan.png" download>Tải ảnh</a>
   </div>
@@ -205,17 +219,17 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
 <div class="card">
   <figure class="mine"><img src="bieu-do/bd-phan-bo-train-test.png" alt="Phân bố nhãn ở tập train và test" loading="lazy"></figure>
   <div class="meta">
-    <div class="cap"><b>Hình 11: Phân bố nhãn ở tập train và test</b><i><code>bieu-do/bd-phan-bo-train-test.png</code></i></div>
-    <button type="button" data-copy="Hình 11: Phân bố nhãn ở tập train và test">Copy caption</button>
+    <div class="cap"><b>Hình 12: Phân bố nhãn ở tập train và test</b><i><code>bieu-do/bd-phan-bo-train-test.png</code></i></div>
+    <button type="button" data-copy="Hình 12: Phân bố nhãn ở tập train và test">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-phan-bo-train-test.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-phan-bo-train-test.png" download>Tải ảnh</a>
   </div>
 </div>
 <div class="card">
-  <figure class="mine"><img src="bieu-do/bd-so-sanh-model.png" alt="So sánh ba mô hình với baseline" loading="lazy"></figure>
+  <figure class="mine"><img src="bieu-do/bd-so-sanh-model.png" alt="So sánh các mô hình với baseline" loading="lazy"></figure>
   <div class="meta">
-    <div class="cap"><b>Hình 12: So sánh ba mô hình với baseline</b><i><code>bieu-do/bd-so-sanh-model.png</code></i></div>
-    <button type="button" data-copy="Hình 12: So sánh ba mô hình với baseline">Copy caption</button>
+    <div class="cap"><b>Hình 13: So sánh các mô hình với baseline</b><i><code>bieu-do/bd-so-sanh-model.png</code></i></div>
+    <button type="button" data-copy="Hình 13: So sánh các mô hình với baseline">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-so-sanh-model.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-so-sanh-model.png" download>Tải ảnh</a>
   </div>
@@ -227,8 +241,8 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
     <div class="side"><span class="tag ref">Ảnh mẫu để đối chiếu</span><figure class="ref"><img src="anh-mau/mau-bieu-do-5-3-fscore-3000.jpg" alt="Biểu đồ 5.3: Kết quả F-score với 3000 bình luận" loading="lazy"><figcaption>Biểu đồ 5.3: Kết quả F-score với 3000 bình luận</figcaption></figure><figure class="ref"><img src="anh-mau/mau-bieu-do-5-1-va-bang-5-4.jpg" alt="Biểu đồ 5.1: F-score với 910 bình luận ngắn (kèm Bảng 5.4)" loading="lazy"><figcaption>Biểu đồ 5.1: F-score với 910 bình luận ngắn (kèm Bảng 5.4)</figcaption></figure></div>
   </div>
   <div class="meta">
-    <div class="cap"><b>Hình 13: Điểm F1 theo từng lớp cảm xúc</b><i><code>bieu-do/bd-f1-tung-lop.png</code></i></div>
-    <button type="button" data-copy="Hình 13: Điểm F1 theo từng lớp cảm xúc">Copy caption</button>
+    <div class="cap"><b>Hình 14: Điểm F1 theo từng lớp cảm xúc</b><i><code>bieu-do/bd-f1-tung-lop.png</code></i></div>
+    <button type="button" data-copy="Hình 14: Điểm F1 theo từng lớp cảm xúc">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-f1-tung-lop.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-f1-tung-lop.png" download>Tải ảnh</a>
   </div>
@@ -236,8 +250,8 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
 <div class="card">
   <figure class="mine"><img src="bieu-do/bd-confusion-nb.png" alt="Ma trận nhầm lẫn – Naive Bayes" loading="lazy"></figure>
   <div class="meta">
-    <div class="cap"><b>Hình 14: Ma trận nhầm lẫn – Naive Bayes</b><i><code>bieu-do/bd-confusion-nb.png</code></i></div>
-    <button type="button" data-copy="Hình 14: Ma trận nhầm lẫn – Naive Bayes">Copy caption</button>
+    <div class="cap"><b>Hình 15: Ma trận nhầm lẫn – Naive Bayes</b><i><code>bieu-do/bd-confusion-nb.png</code></i></div>
+    <button type="button" data-copy="Hình 15: Ma trận nhầm lẫn – Naive Bayes">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-confusion-nb.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-confusion-nb.png" download>Tải ảnh</a>
   </div>
@@ -245,8 +259,8 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
 <div class="card">
   <figure class="mine"><img src="bieu-do/bd-confusion-svm.png" alt="Ma trận nhầm lẫn – SVM" loading="lazy"></figure>
   <div class="meta">
-    <div class="cap"><b>Hình 15: Ma trận nhầm lẫn – SVM</b><i><code>bieu-do/bd-confusion-svm.png</code></i></div>
-    <button type="button" data-copy="Hình 15: Ma trận nhầm lẫn – SVM">Copy caption</button>
+    <div class="cap"><b>Hình 16: Ma trận nhầm lẫn – SVM</b><i><code>bieu-do/bd-confusion-svm.png</code></i></div>
+    <button type="button" data-copy="Hình 16: Ma trận nhầm lẫn – SVM">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-confusion-svm.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-confusion-svm.png" download>Tải ảnh</a>
   </div>
@@ -254,17 +268,26 @@ và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
 <div class="card">
   <figure class="mine"><img src="bieu-do/bd-confusion-lstm.png" alt="Ma trận nhầm lẫn – LSTM" loading="lazy"></figure>
   <div class="meta">
-    <div class="cap"><b>Hình 16: Ma trận nhầm lẫn – LSTM</b><i><code>bieu-do/bd-confusion-lstm.png</code></i></div>
-    <button type="button" data-copy="Hình 16: Ma trận nhầm lẫn – LSTM">Copy caption</button>
+    <div class="cap"><b>Hình 17: Ma trận nhầm lẫn – LSTM</b><i><code>bieu-do/bd-confusion-lstm.png</code></i></div>
+    <button type="button" data-copy="Hình 17: Ma trận nhầm lẫn – LSTM">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-confusion-lstm.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-confusion-lstm.png" download>Tải ảnh</a>
   </div>
 </div>
 <div class="card">
-  <figure class="mine"><img src="bieu-do/bd-thoi-gian-train.png" alt="Thời gian huấn luyện của ba mô hình" loading="lazy"></figure>
+  <figure class="mine"><img src="bieu-do/bd-confusion-lstm_w2v.png" alt="Ma trận nhầm lẫn – LSTM + PhoW2V" loading="lazy"></figure>
   <div class="meta">
-    <div class="cap"><b>Hình 17: Thời gian huấn luyện của ba mô hình</b><i><code>bieu-do/bd-thoi-gian-train.png</code></i></div>
-    <button type="button" data-copy="Hình 17: Thời gian huấn luyện của ba mô hình">Copy caption</button>
+    <div class="cap"><b>Hình 18: Ma trận nhầm lẫn – LSTM + PhoW2V</b><i><code>bieu-do/bd-confusion-lstm_w2v.png</code></i></div>
+    <button type="button" data-copy="Hình 18: Ma trận nhầm lẫn – LSTM + PhoW2V">Copy caption</button>
+    <button type="button" data-copy="bieu-do/bd-confusion-lstm_w2v.png">Copy tên file</button>
+    <a class="btn" href="bieu-do/bd-confusion-lstm_w2v.png" download>Tải ảnh</a>
+  </div>
+</div>
+<div class="card">
+  <figure class="mine"><img src="bieu-do/bd-thoi-gian-train.png" alt="Thời gian huấn luyện của các mô hình" loading="lazy"></figure>
+  <div class="meta">
+    <div class="cap"><b>Hình 19: Thời gian huấn luyện của các mô hình</b><i><code>bieu-do/bd-thoi-gian-train.png</code></i></div>
+    <button type="button" data-copy="Hình 19: Thời gian huấn luyện của các mô hình">Copy caption</button>
     <button type="button" data-copy="bieu-do/bd-thoi-gian-train.png">Copy tên file</button>
     <a class="btn" href="bieu-do/bd-thoi-gian-train.png" download>Tải ảnh</a>
   </div>

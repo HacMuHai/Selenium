@@ -53,6 +53,11 @@ def ensure_indexes(collection: Optional[Collection] = None) -> None:
     except PyMongoError:
         logger.warning("Không tạo được index comments.id", exc_info=True)
     try:
+        # `site` là loại sàn - lọc/thống kê theo sàn là truy vấn hay dùng nhất.
+        col.create_index([("site", 1)], name="site_idx")
+    except PyMongoError:
+        logger.warning("Không tạo được index site", exc_info=True)
+    try:
         col.create_index([("link", 1)], unique=True, name="link_unique_idx")
     except PyMongoError:
         # Dữ liệu cũ có thể đang có link trùng -> chỉ cảnh báo, không crash.

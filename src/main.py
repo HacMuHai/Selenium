@@ -22,6 +22,7 @@ from src.repositories.memory_repository import InMemoryProductRepository
 from src.repositories.product_repository import ProductRepository
 from src.services.export_service import ExportService
 from src.services.scraper_service import ScraperService, summarize
+from src.services.sites import UnknownSiteError, site_class_for
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Xuất Excel sau khi crawl vào thư mục DIR",
     )
     parser.add_argument(
+        "--export-name", default="comments_export", metavar="BASE",
+        help="Tiền tố tên file Excel. Mỗi lần chạy đánh số lại từ _1, nên chạy nhiều "
+             "danh mục lần lượt vào cùng thư mục PHẢI đổi tên này, không sẽ ghi đè nhau",
+    )
+    parser.add_argument(
         "--export-only", action="store_true",
         help="Chỉ export từ DB, không mở Chrome và không crawl",
     )
@@ -83,10 +89,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def resolve_links(args: argparse.Namespace) -> list[str]:
-    """--links > --category."""
-    if args.links:
-        return args.links
-    return CATEGORIES[args.category]
+    """--links > --category. Chặn sớm URL không thuộc sàn nào để khỏi mở Chrome vô ích."""
+    links = args.links if args.links else CATEGORIES[args.category]
+    for link in links:
+        site_class_for(link)  # ném UnknownSiteError kèm danh sách sàn hỗ trợ
+    return links
 
 
 def build_repository(no_db: bool):
@@ -103,10 +110,11 @@ def run_crawl(args: argparse.Namespace, repository) -> None:
     settings = get_settings()
     scraper = ScraperService(repository, wait_timeout=settings.wait_timeout)
     all_results: list[list] = []
+    links = resolve_links(args)  # validate trước khi mở Chrome
 
     try:
         driver = get_driver()
-        for category_url in resolve_links(args):
+        for category_url in links:
             logger.info("Danh mục: %s", category_url)
             product_links = scraper.collect_product_links(
                 driver, category_url, max_pages=args.max_pages, limit=args.limit
@@ -126,12 +134,12 @@ def run_crawl(args: argparse.Namespace, repository) -> None:
     )
 
 
-def run_export(repository, output_dir: str) -> None:
+def run_export(repository, output_dir: str, base_file_name: str = "comments_export") -> None:
     settings = get_settings()
     service = ExportService(
         repository, output_dir, max_rows_per_file=settings.max_rows_per_file
     )
-    files = service.export()
+    files = service.export(base_file_name)
     logger.info("Đã ghi %d file Excel", len(files))
 
 
@@ -153,14 +161,21 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.no_db:
                 logger.error("--export-only cần MongoDB, không dùng được với --no-db")
                 return 2
-            run_export(ProductRepository(), args.export or settings.export_dir)
+            run_export(
+                ProductRepository(),
+                args.export or settings.export_dir,
+                args.export_name,
+            )
             return 0
 
         repository = build_repository(args.no_db)
         run_crawl(args, repository)
         if args.export:
-            run_export(repository, args.export)
+            run_export(repository, args.export, args.export_name)
         return 0
+    except UnknownSiteError as exc:
+        logger.error("%s", exc)
+        return 2
     except KeyboardInterrupt:
         logger.warning("Đã dừng theo yêu cầu người dùng")
         return 130

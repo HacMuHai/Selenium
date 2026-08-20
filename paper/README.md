@@ -96,7 +96,7 @@ trùng lặp. Caption gợi ý nằm trong `index.html`, bấm "Copy caption" l�
 | `bd-phan-bo-train-test` | Kiểm chứng split có phân tầng |
 | `bd-so-sanh-model` | macro-F1 + accuracy của 3 mô hình, có đường baseline |
 | `bd-f1-tung-lop` | F1 từng lớp × từng mô hình + cột trung bình (khớp Biểu đồ 5.1/5.3) |
-| `bd-confusion-{nb,svm,lstm}` | Ma trận nhầm lẫn của từng mô hình |
+| `bd-confusion-{nb,svm,lstm,lstm_w2v}` | Ma trận nhầm lẫn của từng mô hình |
 | `bd-thoi-gian-train` | Chi phí huấn luyện (thang log) |
 
 ## Dữ liệu đầu vào

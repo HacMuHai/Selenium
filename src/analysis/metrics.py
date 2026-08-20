@@ -32,14 +32,18 @@ def confusion_matrix(
 
 
 def per_class_metrics(
-    y_true: Sequence[str], y_pred: Sequence[str]
+    y_true: Sequence[str], y_pred: Sequence[str], labels: Sequence[str] = LABELS
 ) -> dict[str, dict[str, float]]:
-    """precision / recall / f1 / support cho TỪNG lớp trong `LABELS`."""
+    """precision / recall / f1 / support cho TỪNG lớp trong `labels`.
+
+    `labels` truyền vào được để đánh giá bài toán 2 lớp: giữ nguyên 3 lớp thì `neutral`
+    có support 0, f1 0, và macro-F1 bị chia cho 3 -> thấp giả tạo.
+    """
     truth, pred = Counter(y_true), Counter(y_pred)
     hit = Counter(a for a, b in zip(y_true, y_pred) if a == b)
 
     out: dict[str, dict[str, float]] = {}
-    for label in LABELS:
+    for label in labels:
         tp = hit[label]
         precision = tp / pred[label] if pred[label] else 0.0
         recall = tp / truth[label] if truth[label] else 0.0
@@ -54,10 +58,12 @@ def per_class_metrics(
     return out
 
 
-def macro_f1(y_true: Sequence[str], y_pred: Sequence[str]) -> float:
-    """Trung bình F1 trên CẢ 3 lớp, kể cả lớp model không bao giờ đoán tới."""
-    scores = per_class_metrics(y_true, y_pred)
-    return sum(scores[label]["f1"] for label in LABELS) / len(LABELS)
+def macro_f1(
+    y_true: Sequence[str], y_pred: Sequence[str], labels: Sequence[str] = LABELS
+) -> float:
+    """Trung bình F1 trên CẢ các lớp trong `labels`, kể cả lớp model không đoán tới."""
+    scores = per_class_metrics(y_true, y_pred, labels)
+    return sum(scores[label]["f1"] for label in labels) / len(labels)
 
 
 def majority_baseline(y_true: Sequence[str]) -> dict:
@@ -73,12 +79,14 @@ def majority_baseline(y_true: Sequence[str]) -> dict:
     }
 
 
-def evaluation_report(y_true: Sequence[str], y_pred: Sequence[str]) -> dict:
+def evaluation_report(
+    y_true: Sequence[str], y_pred: Sequence[str], labels: Sequence[str] = LABELS
+) -> dict:
     """Gom tất cả chỉ số vào 1 dict JSON-serializable, dùng cho metadata + HTML."""
     return {
         "n": len(y_true),
         "accuracy": accuracy(y_true, y_pred),
-        "macro_f1": macro_f1(y_true, y_pred),
-        "per_class": per_class_metrics(y_true, y_pred),
+        "macro_f1": macro_f1(y_true, y_pred, labels),
+        "per_class": per_class_metrics(y_true, y_pred, labels),
         "confusion": confusion_matrix(y_true, y_pred),
     }

@@ -9,7 +9,7 @@ import html
 import shutil
 from pathlib import Path
 
-from paper import style
+from paper import changelog, style
 
 SAMPLES_DIR = Path(__file__).resolve().parent / "samples"
 
@@ -63,6 +63,18 @@ body { margin:0; padding:2.5rem 1.5rem 4rem; background:var(--bg); color:var(--f
 main { max-width:62rem; margin:0 auto; }
 h1 { font-size:1.7rem; margin:0 0 .3rem; letter-spacing:-.01em; }
 .sub { color:var(--mut); margin:0 0 1.5rem; }
+.moi { border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:.5rem;
+       background:var(--card); padding:1rem 1.2rem .9rem; margin:1.4rem 0 .8rem; }
+.moi h3 { margin:0 0 .7rem; font-size:1rem; letter-spacing:-.01em; }
+.moi ul, .thuatngu ul { margin:0; padding-left:1.1rem; }
+.moi li { margin-bottom:.65rem; }
+.moi li:last-child { margin-bottom:0; }
+.moi li b { font-size:.95rem; }
+.thuatngu { border:1px solid var(--line); border-radius:.5rem; background:var(--card);
+            padding:.6rem .9rem; margin:0 0 1.6rem; color:var(--mut); font-size:.88rem; }
+.thuatngu summary { cursor:pointer; font-weight:600; color:var(--fg); }
+.thuatngu[open] summary { margin-bottom:.6rem; }
+.thuatngu li { margin-bottom:.5rem; }
 h2 { font-size:1.15rem; margin:3rem 0 1rem; padding-bottom:.4rem;
      border-bottom:1px solid var(--line); }
 .stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1.2rem 0 0; }
@@ -248,6 +260,33 @@ def _card(index: int, relpath: str, caption: str, samples: dict[str, str]) -> st
 </div>"""
 
 
+def _khoi_co_gi_moi() -> str:
+    """Khối "Có gì mới" đầu báo cáo, dựng từ `paper/changelog.py`.
+
+    Trước đây chỗ này là ghi chú kỹ thuật cố định (PNG 300dpi, cách xếp hai cột) - đọc
+    một lần là thuộc, mà lại chiếm đúng vị trí đắt nhất của trang. Người mở báo cáo lần
+    thứ hai cần biết bản này khác bản trước chỗ nào, không cần đọc lại cách bấm vào ảnh.
+    """
+    ban = changelog.hien_tai()
+    muc = "".join(
+        f"<li><b>{html.escape(ten)}</b><br>{mo_ta}</li>"
+        for ten, mo_ta in ban["muc"]
+    )
+    tu = "".join(
+        f"<li><b>{html.escape(ten)}</b> — {nghia}</li>" for ten, nghia in changelog.THUAT_NGU
+    )
+    return (
+        f'<section class="moi"><h3>Có gì mới ở phiên bản {html.escape(ban["id"])}</h3>'
+        f"<ul>{muc}</ul></section>"
+        f'<details class="thuatngu"><summary>Thuật ngữ &amp; cách đọc kết quả</summary>'
+        f"<ul>{tu}</ul>"
+        "<p>Ảnh là PNG 300&nbsp;dpi chèn thẳng vào Word được; mỗi bảng có thêm file "
+        "<code>.csv</code> cùng tên. <b>Bấm vào ảnh</b> để phóng to. Hình có ảnh mẫu thì "
+        "xếp hai cột — ảnh mẫu chỉ để đối chiếu bố cục, <b>số liệu hai bên không so trực "
+        "tiếp được</b> vì khác tập dữ liệu và khác số lớp.</p></details>"
+    )
+
+
 def _unmatched_block(samples: dict[str, str]) -> str:
     """Ảnh mẫu chưa có hình tương ứng - nói thẳng ra thay vì giấu đi."""
     entries = [(samples[f], c) for f, c in SAMPLES_UNMATCHED if f in samples]
@@ -317,14 +356,7 @@ def render(items: list[tuple[str, str, str]], metadata: dict) -> Path:
 <p class="sub">Phân tích cảm xúc bình luận sản phẩm tiếng Việt · kết quả huấn luyện
 lúc {trained}</p>
 <div class="stats">{stat_html}</div>
-<p class="note">Toàn bộ ảnh là PNG 300&nbsp;dpi, chèn thẳng vào Word được. Mỗi bảng có
-thêm một file <code>.csv</code> cùng tên nếu bạn muốn tự định dạng lại trong Excel.
-Số thứ tự hình ở đây chỉ để tham chiếu nhanh — khi đưa vào bài, đánh số lại theo
-bố cục chương của bạn. <b>Bấm vào ảnh</b> để phóng to, bấm tiếp để xem cỡ thật.</p>
-<p class="note">Hình nào có ảnh mẫu tương ứng thì xếp <b>hai cột</b>: kết quả của bạn
-bên trái, ảnh mẫu từ bài tham khảo bên phải. Ảnh mẫu chỉ để đối chiếu bố cục và
-cách trình bày — <b>số liệu hai bên không so trực tiếp được</b> vì khác tập dữ liệu
-và khác số lớp (bài mẫu 2 lớp, bài của bạn 3 lớp).</p>
+{_khoi_co_gi_moi()}
 {''.join(body)}
 <footer>Sinh tự động bởi <code>python -m paper.figures</code> · font <b>{html.escape(style.FONT)}</b><br>
 Thư mục: <code>bang/</code> bảng · <code>bieu-do/</code> biểu đồ ·

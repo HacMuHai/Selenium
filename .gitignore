@@ -58,7 +58,10 @@ geckodriver
 # Excel output files (generated data)
 excel_*/
 data/
-data_tagged/
+# Bỏ qua dữ liệu nhưng giữ README mô tả - phải dùng `data_tagged/*` chứ không
+# phải `data_tagged/`: chặn cả thư mục thì git không nhìn vào trong, `!` vô tác dụng.
+data_tagged/*
+!data_tagged/README.md
 outdated/
 *.xlsx
 
@@ -102,3 +105,6 @@ htmlcov/
 
 # FastAPI
 .pytest_cache/
+
+# Vector tiền huấn luyện PhoW2V (file gốc 1,18 GB, bản cắt 1,9 MB)
+vectors/

@@ -57,6 +57,13 @@ class ProductRepository:
         )
         return str(result.inserted_id)
 
+    def replace_by_link(self, link: str, product: Product) -> Optional[str]:
+        """Ghi đè toàn bộ document theo `link` (dùng khi import lại từ Excel)."""
+        result = self.collection.replace_one({"link": link}, dict(product), upsert=True)
+        logger.info("Đã ghi đè product %s (%d comments)", link,
+                    product.get("total_comments", 0))
+        return str(result.upserted_id) if result.upserted_id else None
+
     # ----- API: product -----
 
     def list_products(

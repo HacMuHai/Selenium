@@ -26,6 +26,6 @@ call venv\Scripts\activate.bat
 REM Chạy script (chay tu repo root, KHONG phai python src\main.py)
 echo [INFO] Dang chay du an...
 echo.
-python -m src.main --category phu-kien
+python -m src.main --category tgdd-phu-kien
 
 pause
