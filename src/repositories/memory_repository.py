@@ -36,6 +36,14 @@ class InMemoryProductRepository:
         )
         return str(doc["_id"])
 
+    def replace_by_link(self, link: str, product: Product) -> Optional[str]:
+        """Thay document cùng `link` (không có thì chèn mới)."""
+        for index, doc in enumerate(self._docs):
+            if doc.get("link") == link:
+                self._docs[index] = {"_id": doc["_id"], **dict(product)}
+                return None
+        return self.insert_product(product)
+
     # ----- export -----
 
     def iter_products(self, projection: Optional[dict] = None) -> Iterator[dict]:

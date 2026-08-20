@@ -62,6 +62,10 @@ python -m src.main --links https://cellphones.com.vn/mobile.html --limit 1 --no-
 python -m src.main --export-only               # chỉ xuất Excel từ DB, không mở Chrome
 ```
 
+Không có Mongo vẫn crawl được: `--no-db --export data` giữ dữ liệu trong RAM rồi ghi
+thẳng ra Excel. Khi nào dựng lại được DB thì nạp ngược bằng `python -m src.import_excel`
+(xem [Export & import Excel](#export--import-excel)).
+
 Sàn được nhận diện theo hostname của URL, nên `--links` trộn nhiều sàn trong một lần chạy
 là hợp lệ. URL không thuộc sàn nào sẽ báo lỗi ngay, **trước khi** mở Chrome.
 
@@ -96,6 +100,58 @@ Xem `src/config/targets.py` để biết danh sách đầy đủ.
 | `--attach HOST:PORT` | Attach vào Chrome đang mở sẵn (xem dưới) |
 | `--version-tag STR` | Ghi đè `config.version.version` cho lần chạy này |
 | `--log-level LEVEL` | |
+
+## Crawl trọn CellphoneS + FPT Shop
+
+```bash
+./run_crawl_all.sh           # crawl 11 nhóm vào Mongo rồi xuất Excel
+./run_crawl_all.sh --export  # chỉ xuất lại Excel từ Mongo
+```
+
+Chạy lại được nhiều lần: script nối Mongo nên `exists_by_link` bỏ qua sản phẩm đã có,
+bị chặn giữa chừng cứ chạy lại là tiếp từ chỗ dở. Mặc định 2 luồng; nhóm nào bị chặn thì
+tự nghỉ 15 phút rồi chạy lại nhóm đó với 1 luồng. Log ghi vào `logs/crawl-<thời điểm>.log`.
+
+`--workers` là số **luồng gọi API**, KHÔNG phải số Chrome: với CellphoneS và FPT Shop chỉ
+có đúng 1 Chrome cho bước lấy danh sách sản phẩm, còn comment lấy qua HTTP. Riêng
+thegioididong thì mỗi luồng 1 Chrome vì comment phải đọc DOM.
+
+## Export & import Excel
+
+Excel xuất ra **tách thư mục theo sàn**, mỗi sàn đánh số file riêng:
+
+```
+data/
+├── thegioididong/comments_export_1.xlsx …
+├── cellphones/comments_export_1.xlsx …
+└── fptshop/comments_export_1.xlsx …
+```
+
+Sàn lấy từ field `site`; document cũ chưa có field này thì suy từ hostname của `link`
+(link lạ rơi vào thư mục `khac/`). Header 7 cột:
+
+| Cột | Ghi chú |
+|---|---|
+| `link`, `name_item` | Chỉ điền ở dòng ĐẦU mỗi product, dòng sau để trống cho dễ đọc |
+| `comments_id`, `comments_content` | |
+| `site`, `user_name`, `rating` | Ba cột **thêm**, để import dựng lại đúng document Mongo |
+
+Bốn cột đầu giữ nguyên tên như bản cũ, và `paper/analysis/dataset.py` đọc theo *tên* cột
+nên file mới lẫn file 4 cột cũ đều dùng được cho tầng phân tích. Lưu ý `iter_untagged_files`
+quét **không đệ quy** — trỏ `--input data/cellphones` chứ không phải `--input data`.
+
+### Nạp Excel trở lại Mongo
+
+```bash
+python -m src.import_excel --input data --dry-run       # xem trước, không ghi gì
+python -m src.import_excel --input data                 # product đã có trong DB thì bỏ qua
+python -m src.import_excel --input data/cellphones --mode replace   # ghi đè
+```
+
+Quét **đệ quy** nên trỏ vào `data/` là nạp cả các thư mục con theo sàn. Gom theo `link`
+trên toàn bộ thư mục trước khi ghi, nên product bị cắt sang nhiều file vẫn về đúng một
+document; comment trùng `comments_id` chỉ giữ một bản. `crawled_at` là thời điểm import,
+không phải thời điểm crawl gốc — Excel không lưu mốc đó.
 
 ### Giữ browser ấm khi dev
 
@@ -227,7 +283,8 @@ src/
 │   │   ├── tgdd.py               # đọc DOM
 │   │   ├── cellphones.py         # GraphQL reviews
 │   │   └── fptshop.py            # REST comment/list
-│   ├── export_service.py
+│   ├── export_service.py         # -> data/<sàn>/*.xlsx
+│   ├── import_service.py         # Excel -> document Mongo (đường ngược)
 │   ├── product_service.py
 │   └── errors.py                 # AppError + status_code
 └── utils/helpers.py              # wait_for / click_safe / wait_count_grows
@@ -253,4 +310,4 @@ tests/                            # mongomock, không cần Mongo thật
   được, nên crawler giữ lại tất cả (`rating` = 0 khi không chấm sao) và việc lọc để dành
   cho tầng phân tích. CellphoneS thì ngược lại: mọi review đều có sao.
 - `--workers` mặc định 3; đừng nâng cao quá (lịch sự với site đích, và mỗi Chrome tốn RAM).
-- File Excel sinh ra nằm trong `excel_*/` và đã được gitignore — chứa dữ liệu crawl.
+- File Excel sinh ra nằm trong `data/<sàn>/` — chứa dữ liệu crawl, không commit.

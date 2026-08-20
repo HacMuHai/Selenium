@@ -60,6 +60,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Xuất Excel sau khi crawl vào thư mục DIR",
     )
     parser.add_argument(
+        "--export-name", default="comments_export", metavar="BASE",
+        help="Tiền tố tên file Excel. Mỗi lần chạy đánh số lại từ _1, nên chạy nhiều "
+             "danh mục lần lượt vào cùng thư mục PHẢI đổi tên này, không sẽ ghi đè nhau",
+    )
+    parser.add_argument(
         "--export-only", action="store_true",
         help="Chỉ export từ DB, không mở Chrome và không crawl",
     )
@@ -129,12 +134,12 @@ def run_crawl(args: argparse.Namespace, repository) -> None:
     )
 
 
-def run_export(repository, output_dir: str) -> None:
+def run_export(repository, output_dir: str, base_file_name: str = "comments_export") -> None:
     settings = get_settings()
     service = ExportService(
         repository, output_dir, max_rows_per_file=settings.max_rows_per_file
     )
-    files = service.export()
+    files = service.export(base_file_name)
     logger.info("Đã ghi %d file Excel", len(files))
 
 
@@ -156,13 +161,17 @@ def main(argv: Optional[list[str]] = None) -> int:
             if args.no_db:
                 logger.error("--export-only cần MongoDB, không dùng được với --no-db")
                 return 2
-            run_export(ProductRepository(), args.export or settings.export_dir)
+            run_export(
+                ProductRepository(),
+                args.export or settings.export_dir,
+                args.export_name,
+            )
             return 0
 
         repository = build_repository(args.no_db)
         run_crawl(args, repository)
         if args.export:
-            run_export(repository, args.export)
+            run_export(repository, args.export, args.export_name)
         return 0
     except UnknownSiteError as exc:
         logger.error("%s", exc)
